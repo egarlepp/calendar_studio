@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE Calendar Studio & Batch ICS Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0f9ff', 500: '#0284c7', 600: '#0369a1', 900: '#0c4a6e' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased overflow-x-hidden">
+
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                    SE Calendar Studio
+                    <span class="text-[10px] font-semibold bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full border border-sky-500/20">v3.0</span>
+                </h1>
+                <p class="text-xs text-slate-400 hidden sm:block">Batch SE Event Generator & Outlook .ICS Export Engine</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div id="cloud-status-pill" class="flex items-center gap-1.5 bg-slate-900 text-xs text-emerald-400 font-medium px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-inner">
+                <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="cloud-status-text">Saved Locally</span>
+            </div>
+            
+            <button onclick="openDomainSettingsModal()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition">
+                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                <span id="header-domain-badge">@securwrix.com</span>
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="bg-slate-900/50 border-b border-slate-800/80 px-4 lg:px-8">
+        <nav class="flex space-x-6 overflow-x-auto no-scrollbar">
+            <button onclick="switchTab('generator')" id="tab-btn-generator" class="py-3 text-xs sm:text-sm font-semibold border-b-2 border-sky-500 text-sky-400 whitespace-nowrap flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                1. Batch Generator
+            </button>
+            <button onclick="switchTab('preview')" id="tab-btn-preview" class="py-3 text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                2. Schedule Preview (<span id="tab-count-badge">0</span>)
+            </button>
+            <button onclick="switchTab('roster')" id="tab-btn-roster" class="py-3 text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                Team Roster & Guests
+            </button>
+            <button onclick="switchTab('activities')" id="tab-btn-activities" class="py-3 text-xs sm:text-sm font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Activity Profiles
+            </button>
+        </nav>
+    </div>
+
+    <main class="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
+
+        <!-- TAB 1: BATCH GENERATOR -->
+        <div id="tab-content-generator" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left 2 Cols: Parameters Configuration -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Date & Scheduling Rules Box -->
+                    <div class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-5">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                                Schedule Timeline & Workday Constraints
+                            </h2>
+                            <div class="flex gap-2">
+                                <button type="button" onclick="setPresetRange('2w')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-2.5 py-1 rounded border border-slate-700">2 Weeks</button>
+                                <button type="button" onclick="setPresetRange('1m')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-2.5 py-1 rounded border border-slate-700">1 Month</button>
+                                <button type="button" onclick="setPresetRange('3m')" class="text-[11px] bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 font-semibold px-2.5 py-1 rounded border border-sky-500/30">3 Months (Quarter)</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1.5">Start Date</label>
+                                <input type="date" id="input-start-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1.5">End Date</label>
+                                <input type="date" id="input-end-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Generation Volume & Rules -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">
+                                    Target Work Meetings
+                                    <span class="text-slate-500 block text-[10px] font-normal">Overall date range total</span>
+                                </label>
+                                <input type="number" id="input-target-count" value="120" min="1" max="2000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-semibold text-sky-400 focus:outline-none focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">
+                                    Max Meetings / Day
+                                    <span class="text-slate-500 block text-[10px] font-normal">Prevents daily overload</span>
+                                </label>
+                                <input type="number" id="input-max-daily" value="5" min="1" max="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 focus:outline-none focus:border-sky-500">
+                            </div>
+                            <div class="flex items-center pt-5">
+                                <label class="relative flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="checkbox" id="input-daily-lunch" checked class="sr-only peer">
+                                    <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                                    <span class="text-xs font-medium text-slate-300">Auto Daily Lunch Break</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800/80 text-[11px] text-slate-400 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span><strong>Workday Rules Enforced:</strong> Mon–Fri strictly, 08:00 AM – 06:00 PM (10hr window). Anti-overlap & gap buffer spacing applied automatically.</span>
+                        </div>
+                    </div>
+
+                    <!-- Allowed Durations Picker -->
+                    <div class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-3">
+                        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                            Allowed Duration Options (Randomized Selection)
+                        </h2>
+                        <p class="text-xs text-slate-400">Meetings will be generated with random durations selected from your checked options below:</p>
+                        <div class="flex flex-wrap gap-3 pt-1" id="duration-checkboxes-container">
+                            <!-- Dynamic -->
+                        </div>
+                    </div>
+
+                    <!-- Activities Selection -->
+                    <div class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                                Selected Activity Profiles (Weighted Selection)
+                            </h2>
+                            <button onclick="toggleAllActivities(true)" class="text-[11px] text-sky-400 hover:underline">Select All</button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-300 block mb-2">Work Activities (RFP, POC, Discovery, Demos, Kickoffs, etc.)</span>
+                                <div id="activity-checkboxes-work" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-slate-300 block mb-2">Personal Activities (Lunch, Doctor, Haircut, PTO, Travel)</span>
+                                <div id="activity-checkboxes-personal" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 1 Col: Attendees & Action -->
+                <div class="space-y-6">
+                    
+                    <!-- Attendees Selection Card -->
+                    <div class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div>
+                                <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    Team & Guest Attendees
+                                </h2>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Organizers rotated from company SEs/AEs</p>
+                            </div>
+                            <button onclick="openMemberModal()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-2 py-1 rounded border border-slate-700">+ Add</button>
+                        </div>
+
+                        <div id="team-checkboxes-container" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                            <!-- Dynamic roster checkboxes -->
+                        </div>
+
+                        <button onclick="generateRandomAttendee()" type="button" class="w-full text-center text-xs text-sky-400 hover:text-sky-300 py-2 bg-slate-950/80 hover:bg-slate-950 rounded-xl border border-slate-800 border-dashed transition flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                            Generate Random External Guest
+                        </button>
+                    </div>
+
+                    <!-- Main Generation Launch Action -->
+                    <div class="bg-gradient-to-br from-slate-900 to-sky-950 rounded-2xl border border-sky-500/30 p-6 shadow-2xl space-y-4">
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            Ready to Build Schedule?
+                        </h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Generates complete randomized calendars matching your parameters, weighted frequency probabilities, organizers, and guest domains.
+                        </p>
+                        <button onclick="generateBatchSchedule()" class="w-full py-3.5 px-4 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-sky-500/25 transition transform active:scale-[0.99] flex items-center justify-center gap-2">
+                            <span>Generate Calendar Batch</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SCHEDULE PREVIEW -->
+        <div id="tab-content-preview" class="hidden space-y-6">
+            
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+                    <span class="text-xs font-medium text-slate-400 block">Total Meetings</span>
+                    <span id="stat-total-events" class="text-2xl font-extrabold text-white">0</span>
+                </div>
+                <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+                    <span class="text-xs font-medium text-slate-400 block">Total Scheduled Hours</span>
+                    <span id="stat-total-hours" class="text-2xl font-extrabold text-sky-400">0h</span>
+                </div>
+                <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+                    <span class="text-xs font-medium text-slate-400 block">Unique Attendees</span>
+                    <span id="stat-unique-attendees" class="text-2xl font-extrabold text-indigo-400">0</span>
+                </div>
+                <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+                    <span class="text-xs font-medium text-slate-400 block">Active Days</span>
+                    <span id="stat-active-days" class="text-2xl font-extrabold text-purple-400">0</span>
+                </div>
+            </div>
+
+            <!-- Toolbar & Export Actions -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <input type="text" id="search-queue" oninput="filterQueueTable()" placeholder="Search subject or attendees..." class="bg-slate-950 border border-slate-800 text-xs text-slate-200 px-3 py-2 rounded-xl w-full sm:w-64 focus:outline-none focus:border-sky-500">
+                    <select id="filter-queue-category" onchange="filterQueueTable()" class="bg-slate-950 border border-slate-800 text-xs text-slate-300 px-3 py-2 rounded-xl focus:outline-none">
+                        <option value="all">All Categories</option>
+                        <option value="work">Work Meetings Only</option>
+                        <option value="personal">Personal Meetings Only</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                    <button onclick="clearGeneratedQueue()" class="text-xs text-rose-400 hover:text-rose-300 bg-rose-500/10 px-3 py-2 rounded-xl border border-rose-500/20 font-medium">Clear Batch</button>
+                    <button onclick="downloadICS()" class="text-xs text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 font-bold px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Export .ICS File for Outlook
+                    </button>
+                </div>
+            </div>
+
+            <!-- Schedule Table -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="p-3.5">Date & Time</th>
+                                <th class="p-3.5">Duration</th>
+                                <th class="p-3.5">Activity & Subject</th>
+                                <th class="p-3.5">Organizer</th>
+                                <th class="p-3.5">Attendees</th>
+                                <th class="p-3.5 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queue-table-body" class="divide-y divide-slate-800/60 font-medium">
+                            <!-- Dynamic -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: TEAM ROSTER & GUESTS -->
+        <div id="tab-content-roster" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Team Roster & Guest Directory</h2>
+                    <p class="text-xs text-slate-400">Internal SEs & Sales Reps enforce company domain <span id="roster-domain-label" class="text-sky-400 font-semibold">@securwrix.com</span></p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="generateRandomAttendee()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl border border-slate-700 font-medium">+ Random Client Guest</button>
+                    <button onclick="openMemberModal()" class="text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold px-3 py-2 rounded-xl shadow">+ Add Member</button>
+                </div>
+            </div>
+
+            <div id="team-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamic -->
+            </div>
+        </div>
+
+        <!-- TAB 4: ACTIVITY PROFILES -->
+        <div id="tab-content-activities" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Activity Profiles & Weight Probability</h2>
+                    <p class="text-xs text-slate-400">Configure pre-set subjects, duration defaults, and random selection weights (1-100)</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="rerollActivityWeights()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-3 py-2 rounded-xl border border-slate-700 flex items-center gap-1.5 transition">
+                        <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Reroll Weights
+                    </button>
+                    <button onclick="openActivityModal()" class="text-xs bg-sky-600 hover:bg-sky-500 text-white font-bold px-3 py-2 rounded-xl shadow">+ Add Activity Profile</button>
+                </div>
+            </div>
+
+            <div id="activity-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamic -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- DOMAIN SETTINGS MODAL -->
+    <div id="modal-domain" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <h3 class="text-base font-bold text-white">Configure Domain Environment</h3>
+            <form onsubmit="handleSaveDomainSettings(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Main Company Domain (Internal SE / AE Team)</label>
+                    <input type="text" id="company-domain-input" required class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none focus:border-sky-500">
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-medium text-slate-300">Random Client Guest Domains (Comma Separated)</label>
+                        <button type="button" onclick="addRandomClientDomain()" class="text-[11px] text-sky-400 hover:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 px-2 py-1 rounded-lg border border-sky-500/30 flex items-center gap-1 transition">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            + Random Client Domain
+                        </button>
+                    </div>
+                    <textarea id="external-domains-input" rows="3" required class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none focus:border-sky-500"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-domain')" class="px-4 py-2 text-xs text-slate-400 hover:text-slate-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-xs bg-sky-600 hover:bg-sky-500 font-bold text-white rounded-xl">Save & Update Roster</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MEMBER MODAL -->
+    <div id="modal-member" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <h3 class="text-base font-bold text-white" id="modal-member-title">Add Team Member / Guest</h3>
+            <form onsubmit="handleSaveMember(event)" class="space-y-4">
+                <input type="hidden" id="member-id">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+                    <input type="text" id="member-name" required placeholder="e.g. Jordan Smith" oninput="autoGenerateMemberEmail()" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none focus:border-sky-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Role Type</label>
+                        <select id="member-type" onchange="updateMemberEmailDomainHint()" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2.5 focus:outline-none">
+                            <option value="se">Solutions Engineer (SE)</option>
+                            <option value="sales">Account Executive (AE)</option>
+                            <option value="external">External Client / Guest</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Role Title</label>
+                        <input type="text" id="member-role" required placeholder="e.g. Sr. SE" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Guest Domain Selector (Shown when Role Type is External) -->
+                <div id="guest-domain-container" class="hidden">
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Guest Client Domain</label>
+                    <select id="member-guest-domain" onchange="autoGenerateMemberEmail()" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2.5 focus:outline-none">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-medium text-slate-300">Email Address</label>
+                        <button type="button" onclick="autoGenerateMemberEmail(true)" class="text-[10px] text-sky-400 hover:text-sky-300 flex items-center gap-1 transition">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Randomize Format
+                        </button>
+                    </div>
+                    <input type="email" id="member-email" required placeholder="jordan.smith@securwrix.com" oninput="this.dataset.manualEdit='true'" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none">
+                    <p id="member-email-hint" class="text-[10px] text-slate-500 mt-1">Internal members will automatically adapt to company domain.</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-member')" class="px-4 py-2 text-xs text-slate-400 hover:text-slate-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-xs bg-sky-600 hover:bg-sky-500 font-bold text-white rounded-xl">Save Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ACTIVITY PROFILE MODAL -->
+    <div id="modal-activity" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <h3 class="text-base font-bold text-white">Add Custom Activity Profile</h3>
+            <form onsubmit="handleSaveActivity(event)" class="space-y-4">
+                <input type="hidden" id="activity-id">
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Activity Name</label>
+                        <input type="text" id="activity-name" required placeholder="e.g. Architecture Sync" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Prefix Tag</label>
+                        <input type="text" id="activity-prefix" required placeholder="[ARCH]" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Category</label>
+                        <select id="activity-category" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2.5 focus:outline-none">
+                            <option value="work">Work Activity</option>
+                            <option value="personal">Personal Activity</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Default Duration</label>
+                        <select id="activity-duration" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2.5 focus:outline-none">
+                            <option value="15">15 mins</option>
+                            <option value="30">30 mins</option>
+                            <option value="45">45 mins</option>
+                            <option value="60" selected>60 mins</option>
+                            <option value="90">90 mins</option>
+                            <option value="120">120 mins</option>
+                            <option value="600">Full Day (10 hrs)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-medium text-slate-300">Random Frequency Weight (1-100)</label>
+                        <span id="activity-weight-val" class="text-xs font-bold text-sky-400 font-mono">50</span>
+                    </div>
+                    <input type="range" id="activity-weight" min="1" max="100" value="50" oninput="document.getElementById('activity-weight-val').textContent = this.value" class="w-full accent-sky-500 bg-slate-950 rounded h-1.5 border border-slate-800">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-activity')" class="px-4 py-2 text-xs text-slate-400 hover:text-slate-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-xs bg-sky-600 hover:bg-sky-500 font-bold text-white rounded-xl">Save Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // Global State Variables
+        let companyDomain = 'securwrix.com';
+        let externalDomains = ['testing.com', 'acemcorp.com', 'apex-corp.com', 'vanguard-tech.io', 'summit-systems.net', 'hyper-solutions.org'];
+
+        let allowedDurations = [15, 30, 45, 60, 90, 120];
+        let selectedDurations = [30, 45, 60, 90];
+
+        // Generator helper for initial weights according to rules
+        function generateRandomWeight(profile) {
+            if (profile.id === 'act_p5' || profile.name.toLowerCase().includes('pto') || profile.name.toLowerCase().includes('vacation')) {
+                return Math.floor(Math.random() * 10) + 1; // 1 to 10 for PTO
+            }
+            if (profile.id === 'act_p6' || profile.name.toLowerCase().includes('travel')) {
+                return Math.floor(Math.random() * 15) + 1; // 1 to 15 for Travel
+            }
+            if (profile.category === 'personal') {
+                return Math.floor(Math.random() * 39) + 1; // 1 to 39 for Personal
+            }
+            return Math.floor(Math.random() * 61) + 40; // 40 to 100 for Work
+        }
+
+        // Default Activity Profiles
+        let activityProfiles = [
+            { id: 'act_w1', name: 'RFP Alignment', prefix: '[RFP]', defaultMins: 60, category: 'work', weight: 85 },
+            { id: 'act_w2', name: 'Technical POC Support', prefix: '[POC]', defaultMins: 120, category: 'work', weight: 65 },
+            { id: 'act_w3', name: 'Discovery Session', prefix: '[DISC]', defaultMins: 60, category: 'work', weight: 90 },
+            { id: 'act_w4', name: 'Technical Enablement', prefix: '[ENABLE]', defaultMins: 90, category: 'work', weight: 55 },
+            { id: 'act_w5', name: 'TCC Check-in', prefix: '[TCC]', defaultMins: 45, category: 'work', weight: 70 },
+            { id: 'act_w6', name: 'VRE Sync', prefix: '[VRE]', defaultMins: 60, category: 'work', weight: 50 },
+            { id: 'act_w7', name: 'Marketing Alignment', prefix: '[MKTG]', defaultMins: 45, category: 'work', weight: 45 },
+            { id: 'act_w8', name: 'HealthCheck', prefix: '[HEALTH]', defaultMins: 60, category: 'work', weight: 60 },
+            { id: 'act_w9', name: 'EvalWork', prefix: '[EVAL]', defaultMins: 90, category: 'work', weight: 75 },
+            { id: 'act_w10', name: 'Product Demo', prefix: '[DEMO]', defaultMins: 45, category: 'work', weight: 80 },
+            { id: 'act_w11', name: 'Executive Briefing', prefix: '[EBR]', defaultMins: 60, category: 'work', weight: 40 },
+            { id: 'act_w12', name: 'Account Closeout', prefix: '[CLOSE]', defaultMins: 45, category: 'work', weight: 50 },
+            { id: 'act_w13', name: 'Project Kickoff Call', prefix: '[KICKOFF]', defaultMins: 45, category: 'work', weight: 65 },
+
+            { id: 'act_p1', name: 'Lunch Break', prefix: '[LUNCH]', defaultMins: 45, category: 'personal', weight: 35 },
+            { id: 'act_p2', name: 'Doctor / Medical Appt', prefix: '[DOCTOR]', defaultMins: 60, category: 'personal', weight: 15 },
+            { id: 'act_p3', name: 'Haircut / Personal Errand', prefix: '[ERRAND]', defaultMins: 45, category: 'personal', weight: 20 },
+            { id: 'act_p4', name: 'Workout / Gym', prefix: '[FITNESS]', defaultMins: 60, category: 'personal', weight: 30 },
+            { id: 'act_p5', name: 'PTO / Vacation', prefix: '[PTO]', defaultMins: 600, category: 'personal', isFullDay: true, weight: 5 },
+            { id: 'act_p6', name: 'Business Travel', prefix: '[TRAVEL]', defaultMins: 600, category: 'personal', isFullDay: true, weight: 12 }
+        ];
+
+        // Default Team Members & Guests
+        let teamMembers = [
+            { id: 'mem_1', name: 'Alex Rivera', role: 'Sr. Solutions Engineer', memberType: 'se', email: 'alex.rivera@securwrix.com', isExternal: false },
+            { id: 'mem_2', name: 'Sarah Connor', role: 'Principal SE', memberType: 'se', email: 'sarah.connor@securwrix.com', isExternal: false },
+            { id: 'mem_3', name: 'Michael Vance', role: 'Enterprise AE', memberType: 'sales', email: 'michael.vance@securwrix.com', isExternal: false },
+            { id: 'mem_4', name: 'Jessica Chen', role: 'Lead SE', memberType: 'se', email: 'jessica.chen@securwrix.com', isExternal: false },
+            { id: 'mem_5', name: 'David Miller', role: 'VP Sales', memberType: 'sales', email: 'david.miller@securwrix.com', isExternal: false },
+            { id: 'mem_6', name: 'Robert Thorne', role: 'VP Infrastructure', memberType: 'external', email: 'r.thorne@testing.com', isExternal: true },
+            { id: 'mem_7', name: 'Elena Rostova', role: 'Director IT Ops', memberType: 'external', email: 'elena.rostova@acemcorp.com', isExternal: true }
+        ];
+
+        let generatedEvents = [];
+
+        const mockNames = ["Taylor Morgan", "Jordan Lee", "Chris Casey", "Morgan Vance", "Sam Harper", "Riley Quinn", "Avery Brooks"];
+
+        function initializeUI() {
+            loadSavedState();
+
+            const today = new Date();
+            const threeMonthsLater = new Date();
+            threeMonthsLater.setMonth(today.getMonth() + 3);
+
+            const startDateInput = document.getElementById('input-start-date');
+            const endDateInput = document.getElementById('input-end-date');
+
+            if (startDateInput && !startDateInput.value) {
+                startDateInput.value = today.toISOString().split('T')[0];
+            }
+            if (endDateInput && !endDateInput.value) {
+                endDateInput.value = threeMonthsLater.toISOString().split('T')[0];
+            }
+
+            updateDomainUI();
+            renderDurationCheckboxes();
+            renderActivityCheckboxes();
+            renderActivityCards();
+            renderTeamCheckboxes();
+            renderTeamCards();
+            renderQueueTable();
+        }
+
+        function loadSavedState() {
+            try {
+                const saved = localStorage.getItem('se_calendar_studio_data');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.companyDomain) companyDomain = parsed.companyDomain;
+                    if (parsed.externalDomains) externalDomains = parsed.externalDomains;
+                    if (parsed.teamMembers) teamMembers = parsed.teamMembers;
+                    if (parsed.activityProfiles) activityProfiles = parsed.activityProfiles;
+                }
+            } catch (e) {
+                console.warn("LocalStorage load skipped:", e);
+            }
+            ensureActivityWeights();
+        }
+
+        function saveStateLocally() {
+            try {
+                const state = {
+                    companyDomain,
+                    externalDomains,
+                    teamMembers,
+                    activityProfiles
+                };
+                localStorage.setItem('se_calendar_studio_data', JSON.stringify(state));
+                if (window.saveToCloud) window.saveToCloud();
+            } catch (e) {
+                console.warn("Could not save to localStorage:", e);
+            }
+        }
+
+        function ensureActivityWeights() {
+            activityProfiles.forEach(act => {
+                if (act.weight === undefined) {
+                    act.weight = generateRandomWeight(act);
+                }
+            });
+        }
+
+        function rerollActivityWeights() {
+            activityProfiles.forEach(act => {
+                act.weight = generateRandomWeight(act);
+            });
+            renderActivityCards();
+            renderActivityCheckboxes();
+            saveStateLocally();
+            showToast('Rerolled activity frequency weights!');
+        }
+
+        function updateActivityWeight(id, newWeight) {
+            const act = activityProfiles.find(a => a.id === id);
+            if (act) {
+                act.weight = parseInt(newWeight, 10);
+                saveStateLocally();
+                renderActivityCheckboxes();
+            }
+        }
+
+        function getWeightedRandomProfile(profilesList) {
+            if (!profilesList || profilesList.length === 0) return null;
+            const totalWeight = profilesList.reduce((sum, p) => sum + (p.weight || 50), 0);
+            if (totalWeight <= 0) return profilesList[Math.floor(Math.random() * profilesList.length)];
+            
+            let randomVal = Math.random() * totalWeight;
+            for (const profile of profilesList) {
+                const w = profile.weight || 50;
+                if (randomVal < w) return profile;
+                randomVal -= w;
+            }
+            return profilesList[profilesList.length - 1];
+        }
+
+        function populateGuestDomainDropdown() {
+            const select = document.getElementById('member-guest-domain');
+            if (!select) return;
+            select.innerHTML = externalDomains.map(d => `<option value="${d}">@${d}</option>`).join('');
+        }
+
+        function generateRandomEmailLocalPart(fullName) {
+            if (!fullName || !fullName.trim()) return 'user';
+            const clean = fullName.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
+            const parts = clean.split(/\s+/).filter(Boolean);
+
+            if (parts.length === 0) return 'user';
+            if (parts.length === 1) return parts[0];
+
+            const first = parts[0];
+            const last = parts[parts.length - 1];
+            const firstInitial = first.charAt(0);
+
+            const formats = [
+                `${first}.${last}`,
+                `${firstInitial}.${last}`,
+                `${last}`,
+                `${first}`,
+                `${first}_${last}`,
+                `${firstInitial}${last}`
+            ];
+
+            return formats[Math.floor(Math.random() * formats.length)];
+        }
+
+        function autoGenerateMemberEmail(forceNewFormat = false) {
+            const nameInput = document.getElementById('member-name');
+            const emailInput = document.getElementById('member-email');
+            const memberType = document.getElementById('member-type').value;
+            const guestDomainSelect = document.getElementById('member-guest-domain');
+
+            if (!nameInput || !emailInput) return;
+            const fullName = nameInput.value.trim();
+            if (!fullName) return;
+
+            let targetDomain = companyDomain;
+            if (memberType === 'external' && guestDomainSelect && guestDomainSelect.value) {
+                targetDomain = guestDomainSelect.value;
+            }
+
+            if (forceNewFormat || emailInput.dataset.manualEdit !== 'true') {
+                const localPart = generateRandomEmailLocalPart(fullName);
+                emailInput.value = `${localPart}@${targetDomain}`;
+                if (forceNewFormat) delete emailInput.dataset.manualEdit;
+            }
+        }
+
+        function updateMemberEmailDomainHint() {
+            const type = document.getElementById('member-type').value;
+            const hint = document.getElementById('member-email-hint');
+            const guestDomainContainer = document.getElementById('guest-domain-container');
+
+            if (type === 'external') {
+                if (guestDomainContainer) guestDomainContainer.classList.remove('hidden');
+                if (hint) hint.textContent = 'External client guests use selected external domain.';
+            } else {
+                if (guestDomainContainer) guestDomainContainer.classList.add('hidden');
+                if (hint) hint.textContent = `Internal staff automatically use @${companyDomain}`;
+            }
+            autoGenerateMemberEmail();
+        }
+
+        function openMemberModal(memberId = null) {
+            const modal = document.getElementById('modal-member');
+            if (!modal) return;
+
+            populateGuestDomainDropdown();
+            const emailInput = document.getElementById('member-email');
+
+            if (memberId) {
+                const m = teamMembers.find(item => item.id === memberId);
+                if (m) {
+                    document.getElementById('modal-member-title').textContent = 'Edit Team Member / Guest';
+                    document.getElementById('member-id').value = m.id;
+                    document.getElementById('member-name').value = m.name;
+                    document.getElementById('member-type').value = m.memberType;
+                    document.getElementById('member-role').value = m.role;
+                    if (emailInput) {
+                        emailInput.value = m.email;
+                        emailInput.dataset.manualEdit = 'true';
+                    }
+                    if (m.isExternal) {
+                        const domain = m.email.split('@')[1];
+                        const select = document.getElementById('member-guest-domain');
+                        if (select && domain) select.value = domain;
+                    }
+                }
+            } else {
+                document.getElementById('modal-member-title').textContent = 'Add Team Member / Guest';
+                document.getElementById('member-id').value = '';
+                document.getElementById('member-name').value = '';
+                document.getElementById('member-type').value = 'se';
+                document.getElementById('member-role').value = 'Solutions Engineer';
+                if (emailInput) {
+                    emailInput.value = '';
+                    delete emailInput.dataset.manualEdit;
+                }
+            }
+            updateMemberEmailDomainHint();
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function handleSaveMember(e) {
+            e.preventDefault();
+            const id = document.getElementById('member-id').value;
+            const name = document.getElementById('member-name').value;
+            const memberType = document.getElementById('member-type').value;
+            const role = document.getElementById('member-role').value;
+            let email = document.getElementById('member-email').value;
+
+            const isExternal = (memberType === 'external');
+
+            if (!isExternal && !email.endsWith(`@${companyDomain}`)) {
+                const local = email.split('@')[0] || generateRandomEmailLocalPart(name);
+                email = `${local}@${companyDomain}`;
+            }
+
+            if (id) {
+                const index = teamMembers.findIndex(m => m.id === id);
+                if (index !== -1) {
+                    teamMembers[index] = { id, name, memberType, role, email, isExternal };
+                }
+            } else {
+                const newId = 'mem_' + Date.now();
+                teamMembers.push({ id: newId, name, memberType, role, email, isExternal });
+            }
+
+            renderTeamCheckboxes();
+            renderTeamCards();
+            closeModal('modal-member');
+            saveStateLocally();
+            showToast('Member saved successfully!');
+        }
+
+        function deleteMember(id) {
+            teamMembers = teamMembers.filter(m => m.id !== id);
+            renderTeamCheckboxes();
+            renderTeamCards();
+            saveStateLocally();
+            showToast('Member removed.');
+        }
+
+        function generateRandomAttendee() {
+            const firstName = mockNames[Math.floor(Math.random() * mockNames.length)];
+            const lastName = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller"][Math.floor(Math.random() * 7)];
+            const fullName = `${firstName.split(' ')[0]} ${lastName}`;
+            const randDomain = externalDomains[Math.floor(Math.random() * externalDomains.length)];
+            const localPart = generateRandomEmailLocalPart(fullName);
+            const email = `${localPart}@${randDomain}`;
+
+            const newMember = {
+                id: 'mem_' + Date.now(),
+                name: fullName,
+                role: 'Client Technical Lead',
+                memberType: 'external',
+                isExternal: true,
+                email: email
+            };
+
+            teamMembers.push(newMember);
+            renderTeamCheckboxes();
+            renderTeamCards();
+            saveStateLocally();
+            showToast(`Added random guest: ${fullName}`);
+        }
+
+        function renderActivityCheckboxes() {
+            const workContainer = document.getElementById('activity-checkboxes-work');
+            const personalContainer = document.getElementById('activity-checkboxes-personal');
+
+            const work = activityProfiles.filter(a => a.category === 'work');
+            const personal = activityProfiles.filter(a => a.category === 'personal');
+
+            if (workContainer) {
+                workContainer.innerHTML = work.map(act => `
+                    <label class="flex items-center gap-2 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" value="${act.id}" checked class="act-checkbox rounded text-sky-500 bg-slate-900 border-slate-700">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-200 block truncate">${act.name}</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono font-bold">W:${act.weight || 50}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500">${act.prefix} • ${act.isFullDay ? 'Full Day' : act.defaultMins + 'm'}</span>
+                        </div>
+                    </label>
+                `).join('');
+            }
+
+            if (personalContainer) {
+                personalContainer.innerHTML = personal.map(act => `
+                    <label class="flex items-center gap-2 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" value="${act.id}" class="act-checkbox rounded text-purple-500 bg-slate-900 border-slate-700">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-200 block truncate">${act.name}</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono font-bold">W:${act.weight || 10}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500">${act.prefix} • ${act.isFullDay ? 'Full Day' : act.defaultMins + 'm'}</span>
+                        </div>
+                    </label>
+                `).join('');
+            }
+        }
+
+        function renderActivityCards() {
+            const container = document.getElementById('activity-cards-container');
+            if (!container) return;
+            container.innerHTML = activityProfiles.map(a => `
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-sky-400 font-mono">${a.prefix}</span>
+                                <h3 class="text-sm font-bold text-white">${a.name}</h3>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Default: ${a.isFullDay || a.defaultMins >= 600 ? 'Full Day (10 hours)' : a.defaultMins + ' mins'}</p>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${a.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
+                            ${a.category.toUpperCase()}
+                        </span>
+                    </div>
+
+                    <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 space-y-1.5">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-400 font-medium">Random Weight Probability</span>
+                            <span id="card-weight-val-${a.id}" class="font-bold text-sky-400 font-mono">${a.weight || 50}/100</span>
+                        </div>
+                        <input type="range" min="1" max="100" value="${a.weight || 50}" 
+                            oninput="document.getElementById('card-weight-val-${a.id}').textContent = this.value + '/100'"
+                            onchange="updateActivityWeight('${a.id}', this.value)"
+                            class="w-full accent-sky-500 bg-slate-900 rounded h-1.5 border border-slate-800">
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-800/80">
+                        <button onclick="deleteActivity('${a.id}')" class="text-xs text-rose-400 hover:text-rose-300">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openActivityModal() {
+            document.getElementById('activity-id').value = '';
+            document.getElementById('activity-name').value = '';
+            document.getElementById('activity-prefix').value = '[NEW]';
+            document.getElementById('activity-duration').value = '60';
+            document.getElementById('activity-category').value = 'work';
+            document.getElementById('activity-weight').value = '50';
+            document.getElementById('activity-weight-val').textContent = '50';
+            document.getElementById('modal-activity').classList.remove('hidden');
+        }
+
+        function handleSaveActivity(e) {
+            e.preventDefault();
+            const id = 'act_' + Date.now();
+            const name = document.getElementById('activity-name').value;
+            const prefix = document.getElementById('activity-prefix').value;
+            const defaultMins = parseInt(document.getElementById('activity-duration').value, 10);
+            const category = document.getElementById('activity-category').value;
+            const weight = parseInt(document.getElementById('activity-weight').value, 10) || 50;
+            const isFullDay = (defaultMins >= 600);
+
+            activityProfiles.push({ id, name, prefix, defaultMins, category, isFullDay, weight });
+            renderActivityCards();
+            renderActivityCheckboxes();
+            closeModal('modal-activity');
+            saveStateLocally();
+            showToast('Activity profile saved!');
+        }
+
+        function deleteActivity(id) {
+            activityProfiles = activityProfiles.filter(a => a.id !== id);
+            renderActivityCards();
+            renderActivityCheckboxes();
+            saveStateLocally();
+            showToast('Activity profile removed.');
+        }
+
+        function openDomainSettingsModal() {
+            document.getElementById('company-domain-input').value = companyDomain;
+            document.getElementById('external-domains-input').value = externalDomains.join(', ');
+            document.getElementById('modal-domain').classList.remove('hidden');
+        }
+
+        function handleSaveDomainSettings(e) {
+            e.preventDefault();
+            const newCompDomain = document.getElementById('company-domain-input').value.trim().replace(/^@/, '');
+            const extInput = document.getElementById('external-domains-input').value;
+
+            if (newCompDomain) {
+                companyDomain = newCompDomain;
+                teamMembers.forEach(m => {
+                    if (!m.isExternal) {
+                        const local = m.email.split('@')[0] || generateRandomEmailLocalPart(m.name);
+                        m.email = `${local}@${companyDomain}`;
+                    }
+                });
+            }
+
+            if (extInput) {
+                externalDomains = extInput.split(',').map(d => d.trim().replace(/^@/, '')).filter(Boolean);
+            }
+
+            updateDomainUI();
+            renderTeamCheckboxes();
+            renderTeamCards();
+            closeModal('modal-domain');
+            saveStateLocally();
+            showToast('Domain settings updated!');
+        }
+
+        function addRandomClientDomain() {
+            const prefixes = ['apex', 'vanguard', 'summit', 'hyper', 'nexus', 'strata', 'synergy', 'vertex'];
+            const suffixes = ['corp.com', 'tech.io', 'systems.net', 'solutions.org', 'cloud.net', 'labs.io'];
+            const p = prefixes[Math.floor(Math.random() * prefixes.length)];
+            const s = suffixes[Math.floor(Math.random() * suffixes.length)];
+            const newDom = `${p}-${s}`;
+
+            if (!externalDomains.includes(newDom)) {
+                externalDomains.push(newDom);
+                const input = document.getElementById('external-domains-input');
+                if (input) input.value = externalDomains.join(', ');
+                showToast(`Added domain: ${newDom}`);
+            }
+        }
+
+        function updateDomainUI() {
+            const badge = document.getElementById('header-domain-badge');
+            const label = document.getElementById('roster-domain-label');
+            if (badge) badge.textContent = `@${companyDomain}`;
+            if (label) label.textContent = `@${companyDomain}`;
+        }
+
+        function setPresetRange(preset) {
+            const start = new Date();
+            let end = new Date();
+            if (preset === '2w') {
+                end.setDate(start.getDate() + 14);
+            } else if (preset === '1m') {
+                end.setMonth(start.getMonth() + 1);
+            } else if (preset === '3m') {
+                end.setMonth(start.getMonth() + 3);
+            }
+            document.getElementById('input-start-date').value = start.toISOString().split('T')[0];
+            document.getElementById('input-end-date').value = end.toISOString().split('T')[0];
+        }
+
+        function renderDurationCheckboxes() {
+            const container = document.getElementById('duration-checkboxes-container');
+            if (!container) return;
+            container.innerHTML = allowedDurations.map(dur => `
+                <label class="flex items-center gap-2 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 cursor-pointer text-xs font-medium ${selectedDurations.includes(dur) ? 'text-sky-400 border-sky-500/50' : 'text-slate-400'}">
+                    <input type="checkbox" value="${dur}" ${selectedDurations.includes(dur) ? 'checked' : ''} onchange="toggleDuration(${dur})" class="rounded text-sky-500 bg-slate-900 border-slate-700">
+                    <span>${dur} mins</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleDuration(mins) {
+            if (selectedDurations.includes(mins)) {
+                selectedDurations = selectedDurations.filter(d => d !== mins);
+            } else {
+                selectedDurations.push(mins);
+            }
+            renderDurationCheckboxes();
+        }
+
+        function toggleAllActivities(select) {
+            document.querySelectorAll('.act-checkbox').forEach(cb => cb.checked = select);
+        }
+
+        function renderTeamCheckboxes() {
+            const container = document.getElementById('team-checkboxes-container');
+            if (!container) return;
+            container.innerHTML = teamMembers.map(m => `
+                <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 cursor-pointer hover:border-slate-700">
+                    <div class="flex items-center gap-2.5">
+                        <input type="checkbox" value="${m.id}" checked class="mem-checkbox rounded text-emerald-500 bg-slate-900 border-slate-700">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-200 block">${m.name}</span>
+                            <span class="text-[10px] text-slate-400">${m.role} • ${m.email}</span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] px-2 py-0.5 rounded ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
+                        ${m.isExternal ? 'Guest' : m.memberType.toUpperCase()}
+                    </span>
+                </label>
+            `).join('');
+        }
+
+        function renderTeamCards() {
+            const container = document.getElementById('team-cards-container');
+            if (!container) return;
+            container.innerHTML = teamMembers.map(m => `
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold text-white">${m.name}</h3>
+                            <p class="text-xs text-sky-400 font-medium">${m.role}</p>
+                            <p class="text-xs text-slate-400 mt-1">${m.email}</p>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
+                            ${m.isExternal ? 'EXTERNAL GUEST' : m.memberType === 'se' ? 'SOLUTIONS ENGINEER' : 'ACCOUNT EXEC'}
+                        </span>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                        <button onclick="openMemberModal('${m.id}')" class="text-xs text-sky-400 hover:text-sky-300">Edit</button>
+                        <button onclick="deleteMember('${m.id}')" class="text-xs text-rose-400 hover:text-rose-300">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateBatchSchedule() {
+            const startDateInput = document.getElementById('input-start-date').value;
+            const endDateInput = document.getElementById('input-end-date').value;
+            const targetTotalWork = parseInt(document.getElementById('input-target-count').value, 10) || 50;
+            const maxDailyMeetings = parseInt(document.getElementById('input-max-daily').value, 10) || 5;
+            const includeDailyLunch = document.getElementById('input-daily-lunch').checked;
+
+            if (!startDateInput || !endDateInput) {
+                showToast('Please select valid start and end dates.');
+                return;
+            }
+
+            const start = new Date(startDateInput);
+            const end = new Date(endDateInput);
+            if (start > end) {
+                showToast('Start date must be before end date!');
+                return;
+            }
+
+            const checkedActIds = Array.from(document.querySelectorAll('.act-checkbox:checked')).map(cb => cb.value);
+            if (checkedActIds.length === 0) {
+                showToast('Please select at least one Activity Profile!');
+                return;
+            }
+            const activeProfiles = activityProfiles.filter(a => checkedActIds.includes(a.id));
+            const workProfiles = activeProfiles.filter(a => a.category === 'work');
+            const personalProfiles = activeProfiles.filter(a => a.category === 'personal');
+
+            const checkedMemIds = Array.from(document.querySelectorAll('.mem-checkbox:checked')).map(cb => cb.value);
+            const activeMembers = teamMembers.filter(m => checkedMemIds.includes(m.id));
+            const internalOrganizers = activeMembers.filter(m => !m.isExternal);
+
+            if (internalOrganizers.length === 0) {
+                showToast('You must select at least one Internal SE/AE member as an organizer!');
+                return;
+            }
+
+            const businessDays = [];
+            let curr = new Date(start);
+            while (curr <= end) {
+                const day = curr.getDay();
+                if (day !== 0 && day !== 6) { // Mon-Fri strictly
+                    businessDays.push(new Date(curr));
+                }
+                curr.setDate(curr.getDate() + 1);
+            }
+
+            if (businessDays.length === 0) {
+                showToast('No weekday business days found in selected date range!');
+                return;
+            }
+
+            const newEvents = [];
+            const daySchedules = {};
+            businessDays.forEach(d => {
+                const key = d.toISOString().split('T')[0];
+                daySchedules[key] = [];
+            });
+
+            // 1. Process Daily Lunch Breaks if checked
+            const lunchProfile = activityProfiles.find(a => a.id === 'act_p1') || { name: 'Lunch Break', prefix: '[LUNCH]', defaultMins: 45, category: 'personal' };
+            if (includeDailyLunch) {
+                businessDays.forEach(day => {
+                    const lunchStart = new Date(day);
+                    lunchStart.setHours(12, 0, 0, 0);
+                    const lunchEnd = new Date(lunchStart);
+                    lunchEnd.setMinutes(lunchStart.getMinutes() + 45);
+
+                    const organizer = internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
+                    newEvents.push({
+                        id: 'evt_' + Math.random().toString(36).substr(2, 9),
+                        title: lunchProfile.name,
+                        prefix: lunchProfile.prefix,
+                        category: 'personal',
+                        start: lunchStart,
+                        end: lunchEnd,
+                        durationMins: 45,
+                        organizer: organizer,
+                        attendees: [organizer]
+                    });
+                });
+            }
+
+            newEvents.forEach(evt => {
+                const key = evt.start.toISOString().split('T')[0];
+                if (daySchedules[key]) {
+                    daySchedules[key].push({ start: evt.start.getTime(), end: evt.end.getTime() });
+                }
+            });
+
+            // 2. Distribute Work Meetings (Weighted Random Probability)
+            let remainingWorkMeetings = targetTotalWork;
+            let attempts = 0;
+            const maxAttempts = targetTotalWork * 15;
+
+            while (remainingWorkMeetings > 0 && attempts < maxAttempts) {
+                attempts++;
+                const randomDay = businessDays[Math.floor(Math.random() * businessDays.length)];
+                const dayKey = randomDay.toISOString().split('T')[0];
+                const existing = daySchedules[dayKey];
+
+                if (existing.length >= maxDailyMeetings) continue;
+
+                const profile = workProfiles.length > 0 
+                    ? getWeightedRandomProfile(workProfiles) 
+                    : { name: 'SE Alignment', prefix: '[SE]', category: 'work', weight: 50 };
+
+                const durList = selectedDurations.length > 0 ? selectedDurations : [30, 60];
+                const duration = durList[Math.floor(Math.random() * durList.length)];
+
+                const startHour = 8;
+                const endHour = 18; // 10-hour window (8:00 AM - 6:00 PM)
+
+                const possibleStartHour = startHour + Math.floor(Math.random() * (endHour - startHour - Math.ceil(duration / 60)));
+                const possibleStartMin = Math.random() < 0.5 ? 0 : 30;
+
+                const evtStart = new Date(randomDay);
+                evtStart.setHours(possibleStartHour, possibleStartMin, 0, 0);
+
+                const evtEnd = new Date(evtStart);
+                evtEnd.setMinutes(evtStart.getMinutes() + duration);
+
+                if (evtEnd.getHours() > 18 || (evtEnd.getHours() === 18 && evtEnd.getMinutes() > 0)) continue;
+
+                const sTime = evtStart.getTime();
+                const eTime = evtEnd.getTime();
+                const hasOverlap = existing.some(slot => (sTime < slot.end && eTime > slot.start));
+
+                if (!hasOverlap) {
+                    existing.push({ start: sTime, end: eTime });
+
+                    const organizer = internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
+                    const otherMembers = activeMembers.filter(m => m.id !== organizer.id);
+                    const shuffled = [...otherMembers].sort(() => 0.5 - Math.random());
+                    const attendeeCount = Math.min(shuffled.length, Math.floor(Math.random() * 3) + 1);
+                    const attendees = [organizer, ...shuffled.slice(0, attendeeCount)];
+
+                    newEvents.push({
+                        id: 'evt_' + Math.random().toString(36).substr(2, 9),
+                        title: `${profile.name} - ${attendees[1]?.name || 'Client Sync'}`,
+                        prefix: profile.prefix,
+                        category: 'work',
+                        start: evtStart,
+                        end: evtEnd,
+                        durationMins: duration,
+                        organizer: organizer,
+                        attendees: attendees
+                    });
+
+                    remainingWorkMeetings--;
+                }
+            }
+
+            // 3. Add Personal Meetings & Full-Day Events
+            if (personalProfiles.length > 0) {
+                businessDays.forEach(day => {
+                    const dayKey = day.toISOString().split('T')[0];
+                    const existing = daySchedules[dayKey] || [];
+
+                    if (Math.random() > 0.65) {
+                        const prof = getWeightedRandomProfile(personalProfiles);
+                        if (!prof || prof.id === 'act_p1') return; // Skip lunch here
+
+                        const pStart = new Date(day);
+                        let pEnd = new Date(pStart);
+                        let duration = prof.defaultMins;
+                        let isFullDay = prof.isFullDay || prof.defaultMins >= 600;
+
+                        if (isFullDay) {
+                            pStart.setHours(8, 0, 0, 0);
+                            pEnd.setHours(18, 0, 0, 0);
+                            duration = 600;
+
+                            if (existing.length > 0) return; // Skip full day if work meetings present
+                            existing.push({ start: pStart.getTime(), end: pEnd.getTime() });
+                        } else {
+                            pStart.setHours(14 + Math.floor(Math.random() * 3), Math.random() < 0.5 ? 0 : 30, 0, 0);
+                            pEnd.setMinutes(pStart.getMinutes() + prof.defaultMins);
+
+                            if (existing.some(slot => (pStart.getTime() < slot.end && pEnd.getTime() > slot.start))) return;
+                            existing.push({ start: pStart.getTime(), end: pEnd.getTime() });
+                        }
+
+                        const organizer = internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
+                        newEvents.push({
+                            id: 'evt_' + Math.random().toString(36).substr(2, 9),
+                            title: prof.name,
+                            prefix: prof.prefix,
+                            category: 'personal',
+                            start: pStart,
+                            end: pEnd,
+                            durationMins: duration,
+                            isFullDay: isFullDay,
+                            organizer: organizer,
+                            attendees: [organizer]
+                        });
+                    }
+                });
+            }
+
+            generatedEvents = newEvents.sort((a, b) => a.start - b.start);
+            renderQueueTable();
+            switchTab('preview');
+            showToast(`Generated ${generatedEvents.length} events successfully!`);
+        }
+
+        function renderQueueTable() {
+            const tbody = document.getElementById('queue-table-body');
+            const countBadge = document.getElementById('tab-count-badge');
+
+            if (countBadge) countBadge.textContent = generatedEvents.length;
+
+            let totalMins = 0;
+            const uniqueAttendees = new Set();
+            const activeDays = new Set();
+
+            generatedEvents.forEach(e => {
+                totalMins += e.durationMins || 0;
+                if (e.organizer) uniqueAttendees.add(e.organizer.email);
+                (e.attendees || []).forEach(a => uniqueAttendees.add(a.email));
+                activeDays.add(e.start.toISOString().split('T')[0]);
+            });
+
+            document.getElementById('stat-total-events').textContent = generatedEvents.length;
+            document.getElementById('stat-total-hours').textContent = `${(totalMins / 60).toFixed(1)}h`;
+            document.getElementById('stat-unique-attendees').textContent = uniqueAttendees.size;
+            document.getElementById('stat-active-days').textContent = activeDays.size;
+
+            if (!tbody) return;
+
+            if (generatedEvents.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-500">
+                            No schedule generated yet. Configure parameters and click "Generate Calendar Batch".
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const categoryFilter = document.getElementById('filter-queue-category')?.value || 'all';
+            const searchQuery = (document.getElementById('search-queue')?.value || '').toLowerCase();
+
+            const filtered = generatedEvents.filter(e => {
+                if (categoryFilter !== 'all' && e.category !== categoryFilter) return false;
+                if (searchQuery) {
+                    const matchTitle = e.title.toLowerCase().includes(searchQuery);
+                    const matchOrg = e.organizer?.name.toLowerCase().includes(searchQuery);
+                    const matchAtt = e.attendees.some(a => a.name.toLowerCase().includes(searchQuery));
+                    if (!matchTitle && !matchOrg && !matchAtt) return false;
+                }
+                return true;
+            });
+
+            tbody.innerHTML = filtered.map(e => {
+                const dateStr = e.start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                const timeStr = `${e.start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - ${e.end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+                const attendeesList = e.attendees.map(a => a.name).join(', ');
+
+                return `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3.5">
+                            <span class="block font-bold text-white">${dateStr}</span>
+                            <span class="text-[10px] text-slate-400 font-mono">${timeStr}</span>
+                        </td>
+                        <td class="p-3.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                                ${e.isFullDay ? 'Full Day' : e.durationMins + 'm'}
+                            </span>
+                        </td>
+                        <td class="p-3.5">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${e.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">${e.prefix}</span>
+                                <span class="font-semibold text-slate-100">${e.title}</span>
+                            </div>
+                        </td>
+                        <td class="p-3.5 text-slate-300">${e.organizer?.name || 'N/A'}</td>
+                        <td class="p-3.5 text-slate-400 max-w-xs truncate" title="${attendeesList}">${attendeesList}</td>
+                        <td class="p-3.5 text-right">
+                            <button onclick="deleteEvent('${e.id}')" class="text-rose-400 hover:text-rose-300 text-xs">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterQueueTable() {
+            renderQueueTable();
+        }
+
+        function clearGeneratedQueue() {
+            generatedEvents = [];
+            renderQueueTable();
+            showToast('Batch queue cleared.');
+        }
+
+        function deleteEvent(id) {
+            generatedEvents = generatedEvents.filter(e => e.id !== id);
+            renderQueueTable();
+            showToast('Event removed.');
+        }
+
+        function downloadICS() {
+            if (generatedEvents.length === 0) {
+                showToast('No events in batch to export!');
+                return;
+            }
+
+            let icsContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//SE Calendar Studio//Batch Generator v3.0//EN',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH'
+            ];
+
+            generatedEvents.forEach(evt => {
+                const formatICSDate = (dt) => {
+                    return dt.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                };
+
+                const dtStart = formatICSDate(evt.start);
+                const dtEnd = formatICSDate(evt.end);
+                const dtStamp = formatICSDate(new Date());
+
+                icsContent.push('BEGIN:VEVENT');
+                icsContent.push(`UID:${evt.id}@${companyDomain}`);
+                icsContent.push(`DTSTAMP:${dtStamp}`);
+                icsContent.push(`DTSTART:${dtStart}`);
+                icsContent.push(`DTEND:${dtEnd}`);
+                icsContent.push(`SUMMARY:${evt.prefix} ${evt.title}`);
+                icsContent.push(`ORGANIZER;CN=${evt.organizer?.name || 'SE Operations'}:MAILTO:${evt.organizer?.email || ('se-ops@' + companyDomain)}`);
+
+                if (evt.attendees && evt.attendees.length > 0) {
+                    evt.attendees.forEach(a => {
+                        icsContent.push(`ATTENDEE;CN=${a.name};RSVP=TRUE:MAILTO:${a.email}`);
+                    });
+                }
+
+                icsContent.push('STATUS:CONFIRMED');
+                icsContent.push('END:VEVENT');
+            });
+
+            icsContent.push('END:VCALENDAR');
+
+            const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', `SE_Schedule_Batch_${new Date().toISOString().split('T')[0]}.ics`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast(`Exported ${generatedEvents.length} events to .ICS!`);
+        }
+
+        function switchTab(tabName) {
+            ['generator', 'preview', 'roster', 'activities'].forEach(t => {
+                const content = document.getElementById(`tab-content-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+
+                if (t === tabName) {
+                    content.classList.remove('hidden');
+                    btn.classList.add('border-sky-500', 'text-sky-400');
+                    btn.classList.remove('border-transparent', 'text-slate-400');
+                } else {
+                    content.classList.add('hidden');
+                    btn.classList.remove('border-sky-500', 'text-sky-400');
+                    btn.classList.add('border-transparent', 'text-slate-400');
+                }
+            });
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 border border-sky-500/40 text-slate-100 text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl transition transform duration-300 pointer-events-auto flex items-center gap-2';
+            toast.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-400"></span><span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        window.addEventListener('DOMContentLoaded', initializeUI);
+    </script>
+</body>
+</html>
