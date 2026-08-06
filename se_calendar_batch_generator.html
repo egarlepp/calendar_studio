@@ -284,9 +284,9 @@
                             <tr>
                                 <th class="p-3.5">Date & Time</th>
                                 <th class="p-3.5">Duration</th>
-                                <th class="p-3.5">Activity & Subject</th>
+                                <th class="p-3.5">Activity & Description</th>
                                 <th class="p-3.5">Organizer</th>
-                                <th class="p-3.5">Attendees</th>
+                                <th class="p-3.5">Attendees & Status</th>
                                 <th class="p-3.5 text-right">Action</th>
                             </tr>
                         </thead>
@@ -477,6 +477,28 @@
         // Global State Variables
         let companyDomain = 'securwrix.com';
         let externalDomains = ['testing.com', 'acemcorp.com', 'apex-corp.com', 'vanguard-tech.io', 'summit-systems.net', 'hyper-solutions.org'];
+
+        function getRandomResponseStatus(isOrganizer = false) {
+            if (isOrganizer) return 'ACCEPTED';
+            const rand = Math.random();
+            if (rand < 0.70) return 'ACCEPTED';
+            if (rand < 0.85) return 'TENTATIVE';
+            if (rand < 0.95) return 'NEEDS-ACTION';
+            return 'DECLINED';
+        }
+
+        function generateEventDescription(prefix, title, organizer, attendees, category) {
+            const teamsId = Math.random().toString(36).substring(2, 11);
+            const joinLink = `https://teams.microsoft.com/l/meetup-join/19%3ameeting_${teamsId}%40thread.v2/0`;
+
+            if (category === 'personal') {
+                return `[Personal Calendar Entry]\nSubject: ${title}\nOrganizer: ${organizer.name} (${organizer.email})\nNote: Reserved time on calendar.`;
+            }
+
+            const attendeeList = attendees.map(a => `- ${a.name} (${a.email})`).join('\n');
+
+            return `Activity Type: ${prefix}\nSubject: ${title}\nOrganizer: ${organizer.name} (${organizer.email})\n\nParticipants:\n${attendeeList}\n\nMeeting Agenda:\n1. Scope & Objective Overview\n2. Technical Alignment & Solutions Review\n3. Action Items & Next Steps\n\n------------------------------\nMicrosoft Teams Meeting\nJoin Link: ${joinLink}`;
+        }
 
         let allowedDurations = [15, 30, 45, 60, 90, 120];
         let selectedDurations = [30, 45, 60, 90];
@@ -1132,7 +1154,8 @@
                         end: lunchEnd,
                         durationMins: 45,
                         organizer: organizer,
-                        attendees: [organizer]
+                        description: generateEventDescription(lunchProfile.prefix, lunchProfile.name, organizer, [{...organizer, responseStatus: 'ACCEPTED'}], 'personal'),
+                        attendees: [{ ...organizer, responseStatus: 'ACCEPTED' }]
                     });
                 });
             }
@@ -1189,18 +1212,28 @@
                     const otherMembers = activeMembers.filter(m => m.id !== organizer.id);
                     const shuffled = [...otherMembers].sort(() => 0.5 - Math.random());
                     const attendeeCount = Math.min(shuffled.length, Math.floor(Math.random() * 3) + 1);
-                    const attendees = [organizer, ...shuffled.slice(0, attendeeCount)];
+
+                    const attendees = [
+                        { ...organizer, responseStatus: 'ACCEPTED' },
+                        ...shuffled.slice(0, attendeeCount).map(m => ({
+                            ...m,
+                            responseStatus: getRandomResponseStatus(false)
+                        }))
+                    ];
+
+                    const title = `${profile.name} - ${attendees[1]?.name || 'Client Sync'}`;
 
                     newEvents.push({
                         id: 'evt_' + Math.random().toString(36).substr(2, 9),
-                        title: `${profile.name} - ${attendees[1]?.name || 'Client Sync'}`,
+                        title: title,
                         prefix: profile.prefix,
                         category: 'work',
                         start: evtStart,
                         end: evtEnd,
                         durationMins: duration,
                         organizer: organizer,
-                        attendees: attendees
+                        attendees: attendees,
+                        description: generateEventDescription(profile.prefix, title, organizer, attendees, 'work')
                     });
 
                     remainingWorkMeetings--;
@@ -1238,6 +1271,8 @@
                         }
 
                         const organizer = internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
+                        const attendees = [{ ...organizer, responseStatus: 'ACCEPTED' }];
+
                         newEvents.push({
                             id: 'evt_' + Math.random().toString(36).substr(2, 9),
                             title: prof.name,
@@ -1248,7 +1283,8 @@
                             durationMins: duration,
                             isFullDay: isFullDay,
                             organizer: organizer,
-                            attendees: [organizer]
+                            attendees: attendees,
+                            description: generateEventDescription(prof.prefix, prof.name, organizer, attendees, 'personal')
                         });
                     }
                 });
@@ -1309,10 +1345,29 @@
                 return true;
             });
 
+            const getStatusBadge = (status) => {
+                switch (status) {
+                    case 'ACCEPTED':
+                        return `<span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20" title="Accepted">✓ Accepted</span>`;
+                    case 'TENTATIVE':
+                        return `<span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20" title="Tentative">? Tentative</span>`;
+                    case 'DECLINED':
+                        return `<span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20" title="Declined">✕ Declined</span>`;
+                    default:
+                        return `<span class="inline-flex items-center gap-0.5 text-[9px] font-semibold text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700" title="Pending Response">• Pending</span>`;
+                }
+            };
+
             tbody.innerHTML = filtered.map(e => {
                 const dateStr = e.start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
                 const timeStr = `${e.start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - ${e.end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
-                const attendeesList = e.attendees.map(a => a.name).join(', ');
+                
+                const attendeesPills = e.attendees.map(a => `
+                    <div class="inline-flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 text-[11px] my-0.5">
+                        <span class="text-slate-200 font-medium">${a.name}</span>
+                        ${getStatusBadge(a.responseStatus)}
+                    </div>
+                `).join(' ');
 
                 return `
                     <tr class="hover:bg-slate-800/40 transition">
@@ -1325,14 +1380,17 @@
                                 ${e.isFullDay ? 'Full Day' : e.durationMins + 'm'}
                             </span>
                         </td>
-                        <td class="p-3.5">
-                            <div class="flex items-center gap-2">
+                        <td class="p-3.5 max-w-xs">
+                            <div class="flex items-center gap-2 mb-1">
                                 <span class="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${e.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">${e.prefix}</span>
-                                <span class="font-semibold text-slate-100">${e.title}</span>
+                                <span class="font-semibold text-slate-100 truncate" title="${e.title}">${e.title}</span>
                             </div>
+                            <p class="text-[10px] text-slate-400 line-clamp-1 italic font-mono" title="${e.description}">${e.description.replace(/\n/g, ' • ')}</p>
                         </td>
                         <td class="p-3.5 text-slate-300">${e.organizer?.name || 'N/A'}</td>
-                        <td class="p-3.5 text-slate-400 max-w-xs truncate" title="${attendeesList}">${attendeesList}</td>
+                        <td class="p-3.5 max-w-sm">
+                            <div class="flex flex-wrap gap-1">${attendeesPills}</div>
+                        </td>
                         <td class="p-3.5 text-right">
                             <button onclick="deleteEvent('${e.id}')" class="text-rose-400 hover:text-rose-300 text-xs">Remove</button>
                         </td>
@@ -1386,11 +1444,18 @@
                 icsContent.push(`DTSTART:${dtStart}`);
                 icsContent.push(`DTEND:${dtEnd}`);
                 icsContent.push(`SUMMARY:${evt.prefix} ${evt.title}`);
+
+                if (evt.description) {
+                    const escapedDesc = evt.description.replace(/\n/g, '\\n').replace(/,/g, '\\,');
+                    icsContent.push(`DESCRIPTION:${escapedDesc}`);
+                }
+
                 icsContent.push(`ORGANIZER;CN=${evt.organizer?.name || 'SE Operations'}:MAILTO:${evt.organizer?.email || ('se-ops@' + companyDomain)}`);
 
                 if (evt.attendees && evt.attendees.length > 0) {
                     evt.attendees.forEach(a => {
-                        icsContent.push(`ATTENDEE;CN=${a.name};RSVP=TRUE:MAILTO:${a.email}`);
+                        const status = a.responseStatus || (a.email === evt.organizer?.email ? 'ACCEPTED' : 'NEEDS-ACTION');
+                        icsContent.push(`ATTENDEE;CN=${a.name};PARTSTAT=${status};RSVP=TRUE:MAILTO:${a.email}`);
                     });
                 }
 
