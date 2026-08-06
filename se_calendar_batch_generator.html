@@ -42,7 +42,7 @@
             <div>
                 <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
                     SE Calendar Studio
-                    <span class="text-[10px] font-semibold bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full border border-sky-500/20">v3.0</span>
+                    <span class="text-[10px] font-semibold bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full border border-sky-500/20">v3.2</span>
                 </h1>
                 <p class="text-xs text-slate-400 hidden sm:block">Batch SE Event Generator & Outlook .ICS Export Engine</p>
             </div>
@@ -190,9 +190,46 @@
                     </div>
                 </div>
 
-                <!-- Right 1 Col: Attendees & Action -->
+                <!-- Right 1 Col: Primary User, Attendees & Action -->
                 <div class="space-y-6">
                     
+                    <!-- Primary User Target Card -->
+                    <div class="bg-slate-900 rounded-2xl border border-sky-500/40 p-5 shadow-xl space-y-4 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-sky-500/10 text-sky-400 text-[9px] font-bold px-3 py-1 rounded-bl-xl border-l border-b border-sky-500/30 uppercase tracking-widest">
+                            Primary Calendar Target
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                                Mandatory User Profile
+                            </h2>
+                            <p class="text-[11px] text-slate-400 mt-1">This user is guaranteed to be included in 100% of generated meetings (as Organizer or Attendee).</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Select Primary SE / Target User</label>
+                                <select id="primary-user-select" onchange="updatePrimaryUser(this.value)" class="w-full bg-slate-950 border border-slate-800 text-xs text-sky-400 font-semibold rounded-xl px-3 py-2.5 focus:outline-none focus:border-sky-500">
+                                    <!-- Dynamic options -->
+                                </select>
+                            </div>
+                            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-semibold text-slate-200">Default Response Status Split</span>
+                                    <div class="flex items-center gap-2 font-mono text-[11px]">
+                                        <span id="primary-accepted-label" class="text-emerald-400 font-bold">ACC: 90%</span>
+                                        <span class="text-slate-600">|</span>
+                                        <span id="primary-tentative-label" class="text-amber-400 font-bold">TEN: 10%</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="primary-user-accepted-slider" min="0" max="100" value="90" 
+                                       oninput="updatePrimaryUserSliderLabels(this.value); saveStateLocally()"
+                                       class="w-full accent-emerald-500 bg-slate-900 rounded h-1.5 border border-slate-800">
+                                <p class="text-[10px] text-slate-400">Determines likelihood of Primary User status being Accepted vs Tentative across generated meetings.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Attendees Selection Card -->
                     <div class="bg-slate-900 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
                         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -286,7 +323,7 @@
                                 <th class="p-3.5">Duration</th>
                                 <th class="p-3.5">Activity & Description</th>
                                 <th class="p-3.5">Organizer</th>
-                                <th class="p-3.5">Attendees & Status</th>
+                                <th class="p-3.5">Attendees & Required/Optional Status</th>
                                 <th class="p-3.5 text-right">Action</th>
                             </tr>
                         </thead>
@@ -410,6 +447,23 @@
                     <input type="email" id="member-email" required placeholder="jordan.smith@securwrix.com" oninput="this.dataset.manualEdit='true'" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none">
                     <p id="member-email-hint" class="text-[10px] text-slate-500 mt-1">Internal members will automatically adapt to company domain.</p>
                 </div>
+
+                <!-- Attendance Role Probability Split Slider -->
+                <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-semibold text-slate-200">Required vs Optional Split</span>
+                        <div class="flex items-center gap-2 font-mono text-[11px]">
+                            <span id="member-req-label" class="text-sky-400 font-bold">REQ: 80%</span>
+                            <span class="text-slate-600">|</span>
+                            <span id="member-opt-label" class="text-purple-400 font-bold">OPT: 20%</span>
+                        </div>
+                    </div>
+                    <input type="range" id="member-req-slider" min="0" max="100" value="80" 
+                           oninput="updateMemberSliderLabels(this.value)"
+                           class="w-full accent-sky-500 bg-slate-900 rounded h-1.5 border border-slate-800">
+                    <p class="text-[10px] text-slate-400">Determines likelihood of being flagged as Required (`REQ-PARTICIPANT`) vs Optional (`OPT-PARTICIPANT`) in invite.</p>
+                </div>
+
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeModal('modal-member')" class="px-4 py-2 text-xs text-slate-400 hover:text-slate-200">Cancel</button>
                     <button type="submit" class="px-4 py-2 text-xs bg-sky-600 hover:bg-sky-500 font-bold text-white rounded-xl">Save Member</button>
@@ -477,6 +531,8 @@
         // Global State Variables
         let companyDomain = 'securwrix.com';
         let externalDomains = ['testing.com', 'acemcorp.com', 'apex-corp.com', 'vanguard-tech.io', 'summit-systems.net', 'hyper-solutions.org'];
+        let primaryUserId = 'mem_1'; // Default target user forced onto all meetings
+        let primaryUserAcceptedWeight = 90; // Default 90% Accepted, 10% Tentative
 
         function getRandomResponseStatus(isOrganizer = false) {
             if (isOrganizer) return 'ACCEPTED';
@@ -487,6 +543,11 @@
             return 'DECLINED';
         }
 
+        function getPrimaryUserResponseStatus() {
+            const roll = Math.random() * 100;
+            return roll < primaryUserAcceptedWeight ? 'ACCEPTED' : 'TENTATIVE';
+        }
+
         function generateEventDescription(prefix, title, organizer, attendees, category) {
             const teamsId = Math.random().toString(36).substring(2, 11);
             const joinLink = `https://teams.microsoft.com/l/meetup-join/19%3ameeting_${teamsId}%40thread.v2/0`;
@@ -495,7 +556,7 @@
                 return `[Personal Calendar Entry]\nSubject: ${title}\nOrganizer: ${organizer.name} (${organizer.email})\nNote: Reserved time on calendar.`;
             }
 
-            const attendeeList = attendees.map(a => `- ${a.name} (${a.email})`).join('\n');
+            const attendeeList = attendees.map(a => `- ${a.name} (${a.email}) [${a.isReq ? 'REQUIRED' : 'OPTIONAL'}]`).join('\n');
 
             return `Activity Type: ${prefix}\nSubject: ${title}\nOrganizer: ${organizer.name} (${organizer.email})\n\nParticipants:\n${attendeeList}\n\nMeeting Agenda:\n1. Scope & Objective Overview\n2. Technical Alignment & Solutions Review\n3. Action Items & Next Steps\n\n------------------------------\nMicrosoft Teams Meeting\nJoin Link: ${joinLink}`;
         }
@@ -541,15 +602,15 @@
             { id: 'act_p6', name: 'Business Travel', prefix: '[TRAVEL]', defaultMins: 600, category: 'personal', isFullDay: true, weight: 12 }
         ];
 
-        // Default Team Members & Guests
+        // Default Team Members & Guests (with requiredWeight 0-100, optionalWeight = 100 - requiredWeight)
         let teamMembers = [
-            { id: 'mem_1', name: 'Alex Rivera', role: 'Sr. Solutions Engineer', memberType: 'se', email: 'alex.rivera@securwrix.com', isExternal: false },
-            { id: 'mem_2', name: 'Sarah Connor', role: 'Principal SE', memberType: 'se', email: 'sarah.connor@securwrix.com', isExternal: false },
-            { id: 'mem_3', name: 'Michael Vance', role: 'Enterprise AE', memberType: 'sales', email: 'michael.vance@securwrix.com', isExternal: false },
-            { id: 'mem_4', name: 'Jessica Chen', role: 'Lead SE', memberType: 'se', email: 'jessica.chen@securwrix.com', isExternal: false },
-            { id: 'mem_5', name: 'David Miller', role: 'VP Sales', memberType: 'sales', email: 'david.miller@securwrix.com', isExternal: false },
-            { id: 'mem_6', name: 'Robert Thorne', role: 'VP Infrastructure', memberType: 'external', email: 'r.thorne@testing.com', isExternal: true },
-            { id: 'mem_7', name: 'Elena Rostova', role: 'Director IT Ops', memberType: 'external', email: 'elena.rostova@acemcorp.com', isExternal: true }
+            { id: 'mem_1', name: 'Alex Rivera', role: 'Sr. Solutions Engineer', memberType: 'se', email: 'alex.rivera@securwrix.com', isExternal: false, requiredWeight: 90 },
+            { id: 'mem_2', name: 'Sarah Connor', role: 'Principal SE', memberType: 'se', email: 'sarah.connor@securwrix.com', isExternal: false, requiredWeight: 80 },
+            { id: 'mem_3', name: 'Michael Vance', role: 'Enterprise AE', memberType: 'sales', email: 'michael.vance@securwrix.com', isExternal: false, requiredWeight: 85 },
+            { id: 'mem_4', name: 'Jessica Chen', role: 'Lead SE', memberType: 'se', email: 'jessica.chen@securwrix.com', isExternal: false, requiredWeight: 75 },
+            { id: 'mem_5', name: 'David Miller', role: 'VP Sales', memberType: 'sales', email: 'david.miller@securwrix.com', isExternal: false, requiredWeight: 40 },
+            { id: 'mem_6', name: 'Robert Thorne', role: 'VP Infrastructure', memberType: 'external', email: 'r.thorne@testing.com', isExternal: true, requiredWeight: 70 },
+            { id: 'mem_7', name: 'Elena Rostova', role: 'Director IT Ops', memberType: 'external', email: 'elena.rostova@acemcorp.com', isExternal: true, requiredWeight: 60 }
         ];
 
         let generatedEvents = [];
@@ -574,6 +635,8 @@
             }
 
             updateDomainUI();
+            renderPrimaryUserSelector();
+            updatePrimaryUserSliderLabels(primaryUserAcceptedWeight);
             renderDurationCheckboxes();
             renderActivityCheckboxes();
             renderActivityCards();
@@ -591,11 +654,14 @@
                     if (parsed.externalDomains) externalDomains = parsed.externalDomains;
                     if (parsed.teamMembers) teamMembers = parsed.teamMembers;
                     if (parsed.activityProfiles) activityProfiles = parsed.activityProfiles;
+                    if (parsed.primaryUserId) primaryUserId = parsed.primaryUserId;
+                    if (parsed.primaryUserAcceptedWeight !== undefined) primaryUserAcceptedWeight = parsed.parsedPrimaryUserAcceptedWeight || parsed.primaryUserAcceptedWeight;
                 }
             } catch (e) {
                 console.warn("LocalStorage load skipped:", e);
             }
             ensureActivityWeights();
+            ensureMemberWeights();
         }
 
         function saveStateLocally() {
@@ -604,7 +670,9 @@
                     companyDomain,
                     externalDomains,
                     teamMembers,
-                    activityProfiles
+                    activityProfiles,
+                    primaryUserId,
+                    primaryUserAcceptedWeight
                 };
                 localStorage.setItem('se_calendar_studio_data', JSON.stringify(state));
                 if (window.saveToCloud) window.saveToCloud();
@@ -619,6 +687,50 @@
                     act.weight = generateRandomWeight(act);
                 }
             });
+        }
+
+        function ensureMemberWeights() {
+            teamMembers.forEach(m => {
+                if (m.requiredWeight === undefined) {
+                    m.requiredWeight = 80;
+                }
+            });
+        }
+
+        function renderPrimaryUserSelector() {
+            const select = document.getElementById('primary-user-select');
+            if (!select) return;
+            const internalMembers = teamMembers.filter(m => !m.isExternal);
+            
+            // Check if primaryUserId exists
+            if (!teamMembers.some(m => m.id === primaryUserId) && internalMembers.length > 0) {
+                primaryUserId = internalMembers[0].id;
+            }
+
+            select.innerHTML = internalMembers.map(m => `
+                <option value="${m.id}" ${m.id === primaryUserId ? 'selected' : ''}>
+                    ${m.name} (${m.role}) - ${m.email}
+                </option>
+            `).join('');
+        }
+
+        function updatePrimaryUser(id) {
+            primaryUserId = id;
+            saveStateLocally();
+            renderTeamCards();
+            renderTeamCheckboxes();
+            showToast('Primary Target User set!');
+        }
+
+        function updatePrimaryUserSliderLabels(val) {
+            const accVal = parseInt(val, 10);
+            primaryUserAcceptedWeight = accVal;
+            const slider = document.getElementById('primary-user-accepted-slider');
+            if (slider && parseInt(slider.value, 10) !== accVal) slider.value = accVal;
+            const accLabel = document.getElementById('primary-accepted-label');
+            const tenLabel = document.getElementById('primary-tentative-label');
+            if (accLabel) accLabel.textContent = `ACC: ${accVal}%`;
+            if (tenLabel) tenLabel.textContent = `TEN: ${100 - accVal}%`;
         }
 
         function rerollActivityWeights() {
@@ -721,12 +833,22 @@
             autoGenerateMemberEmail();
         }
 
+        function updateMemberSliderLabels(val) {
+            const reqVal = parseInt(val, 10);
+            const optVal = 100 - reqVal;
+            const reqLabel = document.getElementById('member-req-label');
+            const optLabel = document.getElementById('member-opt-label');
+            if (reqLabel) reqLabel.textContent = `REQ: ${reqVal}%`;
+            if (optLabel) optLabel.textContent = `OPT: ${optVal}%`;
+        }
+
         function openMemberModal(memberId = null) {
             const modal = document.getElementById('modal-member');
             if (!modal) return;
 
             populateGuestDomainDropdown();
             const emailInput = document.getElementById('member-email');
+            const slider = document.getElementById('member-req-slider');
 
             if (memberId) {
                 const m = teamMembers.find(item => item.id === memberId);
@@ -740,6 +862,10 @@
                         emailInput.value = m.email;
                         emailInput.dataset.manualEdit = 'true';
                     }
+                    if (slider) {
+                        slider.value = m.requiredWeight !== undefined ? m.requiredWeight : 80;
+                        updateMemberSliderLabels(slider.value);
+                    }
                     if (m.isExternal) {
                         const domain = m.email.split('@')[1];
                         const select = document.getElementById('member-guest-domain');
@@ -752,6 +878,10 @@
                 document.getElementById('member-name').value = '';
                 document.getElementById('member-type').value = 'se';
                 document.getElementById('member-role').value = 'Solutions Engineer';
+                if (slider) {
+                    slider.value = 80;
+                    updateMemberSliderLabels(80);
+                }
                 if (emailInput) {
                     emailInput.value = '';
                     delete emailInput.dataset.manualEdit;
@@ -773,6 +903,7 @@
             const memberType = document.getElementById('member-type').value;
             const role = document.getElementById('member-role').value;
             let email = document.getElementById('member-email').value;
+            const requiredWeight = parseInt(document.getElementById('member-req-slider').value, 10) || 80;
 
             const isExternal = (memberType === 'external');
 
@@ -784,13 +915,14 @@
             if (id) {
                 const index = teamMembers.findIndex(m => m.id === id);
                 if (index !== -1) {
-                    teamMembers[index] = { id, name, memberType, role, email, isExternal };
+                    teamMembers[index] = { id, name, memberType, role, email, isExternal, requiredWeight };
                 }
             } else {
                 const newId = 'mem_' + Date.now();
-                teamMembers.push({ id: newId, name, memberType, role, email, isExternal });
+                teamMembers.push({ id: newId, name, memberType, role, email, isExternal, requiredWeight });
             }
 
+            renderPrimaryUserSelector();
             renderTeamCheckboxes();
             renderTeamCards();
             closeModal('modal-member');
@@ -799,7 +931,12 @@
         }
 
         function deleteMember(id) {
+            if (id === primaryUserId) {
+                showToast('Cannot delete the primary target user! Assign another primary target user first.');
+                return;
+            }
             teamMembers = teamMembers.filter(m => m.id !== id);
+            renderPrimaryUserSelector();
             renderTeamCheckboxes();
             renderTeamCards();
             saveStateLocally();
@@ -820,7 +957,8 @@
                 role: 'Client Technical Lead',
                 memberType: 'external',
                 isExternal: true,
-                email: email
+                email: email,
+                requiredWeight: Math.floor(Math.random() * 41) + 50 // 50-90% Required
             };
 
             teamMembers.push(newMember);
@@ -967,6 +1105,7 @@
             }
 
             updateDomainUI();
+            renderPrimaryUserSelector();
             renderTeamCheckboxes();
             renderTeamCards();
             closeModal('modal-domain');
@@ -1038,17 +1177,22 @@
             const container = document.getElementById('team-checkboxes-container');
             if (!container) return;
             container.innerHTML = teamMembers.map(m => `
-                <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 cursor-pointer hover:border-slate-700">
+                <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border ${m.id === primaryUserId ? 'border-sky-500/60 bg-sky-950/20' : 'border-slate-800/80'} cursor-pointer hover:border-slate-700">
                     <div class="flex items-center gap-2.5">
-                        <input type="checkbox" value="${m.id}" checked class="mem-checkbox rounded text-emerald-500 bg-slate-900 border-slate-700">
+                        <input type="checkbox" value="${m.id}" ${m.id === primaryUserId ? 'checked disabled' : 'checked'} class="mem-checkbox rounded text-emerald-500 bg-slate-900 border-slate-700">
                         <div>
-                            <span class="text-xs font-semibold text-slate-200 block">${m.name}</span>
+                            <span class="text-xs font-semibold ${m.id === primaryUserId ? 'text-sky-300 font-bold' : 'text-slate-200'} block">
+                                ${m.name} ${m.id === primaryUserId ? '<span class="text-[9px] bg-sky-500/20 text-sky-400 px-1.5 py-0.2 rounded ml-1 border border-sky-500/30">PRIMARY TARGET</span>' : ''}
+                            </span>
                             <span class="text-[10px] text-slate-400">${m.role} • ${m.email}</span>
                         </div>
                     </div>
-                    <span class="text-[10px] px-2 py-0.5 rounded ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
-                        ${m.isExternal ? 'Guest' : m.memberType.toUpperCase()}
-                    </span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800" title="Required vs Optional Probability">Req:${m.requiredWeight || 80}%</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
+                            ${m.isExternal ? 'Guest' : m.memberType.toUpperCase()}
+                        </span>
+                    </div>
                 </label>
             `).join('');
         }
@@ -1057,23 +1201,47 @@
             const container = document.getElementById('team-cards-container');
             if (!container) return;
             container.innerHTML = teamMembers.map(m => `
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <h3 class="text-sm font-bold text-white">${m.name}</h3>
-                            <p class="text-xs text-sky-400 font-medium">${m.role}</p>
-                            <p class="text-xs text-slate-400 mt-1">${m.email}</p>
+                <div class="bg-slate-900 border ${m.id === primaryUserId ? 'border-sky-500/60 bg-gradient-to-br from-slate-900 to-sky-950/30' : 'border-slate-800'} rounded-2xl p-4 flex flex-col justify-between space-y-3 relative">
+                    ${m.id === primaryUserId ? '<div class="absolute top-2 right-2 text-[9px] bg-sky-500/20 text-sky-400 font-bold px-2 py-0.5 rounded border border-sky-500/30">PRIMARY TARGET</div>' : ''}
+                    <div>
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-sm font-bold text-white">${m.name}</h3>
+                                <p class="text-xs text-sky-400 font-medium">${m.role}</p>
+                                <p class="text-xs text-slate-400 mt-1">${m.email}</p>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 space-y-1">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-400">Attendance Probability</span>
+                            <span class="font-mono text-sky-400 font-bold">REQ: ${m.requiredWeight || 80}% | OPT: ${100 - (m.requiredWeight || 80)}%</span>
+                        </div>
+                        <div class="w-full bg-purple-900/40 h-1.5 rounded-full overflow-hidden flex">
+                            <div class="bg-sky-400 h-full" style="width: ${m.requiredWeight || 80}%"></div>
+                            <div class="bg-purple-400 h-full" style="width: ${100 - (m.requiredWeight || 80)}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-800">
                         <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
                             ${m.isExternal ? 'EXTERNAL GUEST' : m.memberType === 'se' ? 'SOLUTIONS ENGINEER' : 'ACCOUNT EXEC'}
                         </span>
-                    </div>
-                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                        <button onclick="openMemberModal('${m.id}')" class="text-xs text-sky-400 hover:text-sky-300">Edit</button>
-                        <button onclick="deleteMember('${m.id}')" class="text-xs text-rose-400 hover:text-rose-300">Delete</button>
+                        <div class="flex gap-2">
+                            <button onclick="openMemberModal('${m.id}')" class="text-xs text-sky-400 hover:text-sky-300">Edit</button>
+                            ${m.id !== primaryUserId ? `<button onclick="deleteMember('${m.id}')" class="text-xs text-rose-400 hover:text-rose-300">Delete</button>` : ''}
+                        </div>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // Determine attendee Required vs Optional role based on probability
+        function evaluateAttendeeRole(member) {
+            const reqChance = member.requiredWeight !== undefined ? member.requiredWeight : 80;
+            const roll = Math.random() * 100;
+            return roll < reqChance; // true = Required, false = Optional
         }
 
         function generateBatchSchedule() {
@@ -1105,8 +1273,10 @@
             const personalProfiles = activeProfiles.filter(a => a.category === 'personal');
 
             const checkedMemIds = Array.from(document.querySelectorAll('.mem-checkbox:checked')).map(cb => cb.value);
-            const activeMembers = teamMembers.filter(m => checkedMemIds.includes(m.id));
+            const activeMembers = teamMembers.filter(m => checkedMemIds.includes(m.id) || m.id === primaryUserId);
             const internalOrganizers = activeMembers.filter(m => !m.isExternal);
+
+            const primaryUserObj = teamMembers.find(m => m.id === primaryUserId) || internalOrganizers[0];
 
             if (internalOrganizers.length === 0) {
                 showToast('You must select at least one Internal SE/AE member as an organizer!');
@@ -1144,7 +1314,9 @@
                     const lunchEnd = new Date(lunchStart);
                     lunchEnd.setMinutes(lunchStart.getMinutes() + 45);
 
-                    const organizer = internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
+                    const organizer = primaryUserObj;
+                    const primaryStatus = getPrimaryUserResponseStatus();
+
                     newEvents.push({
                         id: 'evt_' + Math.random().toString(36).substr(2, 9),
                         title: lunchProfile.name,
@@ -1154,8 +1326,8 @@
                         end: lunchEnd,
                         durationMins: 45,
                         organizer: organizer,
-                        description: generateEventDescription(lunchProfile.prefix, lunchProfile.name, organizer, [{...organizer, responseStatus: 'ACCEPTED'}], 'personal'),
-                        attendees: [{ ...organizer, responseStatus: 'ACCEPTED' }]
+                        description: generateEventDescription(lunchProfile.prefix, lunchProfile.name, organizer, [{...organizer, responseStatus: primaryStatus, isReq: true}], 'personal'),
+                        attendees: [{ ...organizer, responseStatus: primaryStatus, isReq: true, role: 'REQ-PARTICIPANT' }]
                     });
                 });
             }
@@ -1208,17 +1380,40 @@
                 if (!hasOverlap) {
                     existing.push({ start: sTime, end: eTime });
 
-                    const organizer = internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
+                    // Decide Organizer: 60% Primary user, 40% another internal organizer
+                    const usePrimaryAsOrg = Math.random() < 0.60;
+                    const organizer = usePrimaryAsOrg 
+                        ? primaryUserObj 
+                        : internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
+
                     const otherMembers = activeMembers.filter(m => m.id !== organizer.id);
                     const shuffled = [...otherMembers].sort(() => 0.5 - Math.random());
                     const attendeeCount = Math.min(shuffled.length, Math.floor(Math.random() * 3) + 1);
+                    
+                    let selectedAttendees = shuffled.slice(0, attendeeCount);
+
+                    // ENSURE Primary Target User is always on every meeting!
+                    if (organizer.id !== primaryUserObj.id && !selectedAttendees.some(a => a.id === primaryUserObj.id)) {
+                        selectedAttendees.push(primaryUserObj);
+                    }
 
                     const attendees = [
-                        { ...organizer, responseStatus: 'ACCEPTED' },
-                        ...shuffled.slice(0, attendeeCount).map(m => ({
-                            ...m,
-                            responseStatus: getRandomResponseStatus(false)
-                        }))
+                        { 
+                            ...organizer, 
+                            responseStatus: organizer.id === primaryUserObj.id ? getPrimaryUserResponseStatus() : 'ACCEPTED',
+                            isReq: true,
+                            role: 'REQ-PARTICIPANT'
+                        },
+                        ...selectedAttendees.map(m => {
+                            const isReq = evaluateAttendeeRole(m);
+                            const isPrimary = (m.id === primaryUserObj.id);
+                            return {
+                                ...m,
+                                responseStatus: isPrimary ? getPrimaryUserResponseStatus() : getRandomResponseStatus(false),
+                                isReq: isPrimary ? true : isReq,
+                                role: (isPrimary || isReq) ? 'REQ-PARTICIPANT' : 'OPT-PARTICIPANT'
+                            };
+                        })
                     ];
 
                     const title = `${profile.name} - ${attendees[1]?.name || 'Client Sync'}`;
@@ -1270,8 +1465,9 @@
                             existing.push({ start: pStart.getTime(), end: pEnd.getTime() });
                         }
 
-                        const organizer = internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
-                        const attendees = [{ ...organizer, responseStatus: 'ACCEPTED' }];
+                        const organizer = primaryUserObj;
+                        const primaryStatus = getPrimaryUserResponseStatus();
+                        const attendees = [{ ...organizer, responseStatus: primaryStatus, isReq: true, role: 'REQ-PARTICIPANT' }];
 
                         newEvents.push({
                             id: 'evt_' + Math.random().toString(36).substr(2, 9),
@@ -1293,7 +1489,7 @@
             generatedEvents = newEvents.sort((a, b) => a.start - b.start);
             renderQueueTable();
             switchTab('preview');
-            showToast(`Generated ${generatedEvents.length} events successfully!`);
+            showToast(`Generated ${generatedEvents.length} events matching target primary user!`);
         }
 
         function renderQueueTable() {
@@ -1358,13 +1554,21 @@
                 }
             };
 
+            const getRoleBadge = (isReq) => {
+                if (isReq) {
+                    return `<span class="text-[9px] font-mono font-bold text-sky-400 bg-sky-500/10 px-1 py-0.5 rounded border border-sky-500/20">REQ</span>`;
+                }
+                return `<span class="text-[9px] font-mono font-bold text-purple-400 bg-purple-500/10 px-1 py-0.5 rounded border border-purple-500/20">OPT</span>`;
+            };
+
             tbody.innerHTML = filtered.map(e => {
                 const dateStr = e.start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
                 const timeStr = `${e.start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - ${e.end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
                 
                 const attendeesPills = e.attendees.map(a => `
                     <div class="inline-flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 text-[11px] my-0.5">
-                        <span class="text-slate-200 font-medium">${a.name}</span>
+                        ${getRoleBadge(a.isReq)}
+                        <span class="text-slate-200 font-medium ${a.id === primaryUserId ? 'text-sky-300 font-bold' : ''}">${a.name}</span>
                         ${getStatusBadge(a.responseStatus)}
                     </div>
                 `).join(' ');
@@ -1387,7 +1591,7 @@
                             </div>
                             <p class="text-[10px] text-slate-400 line-clamp-1 italic font-mono" title="${e.description}">${e.description.replace(/\n/g, ' • ')}</p>
                         </td>
-                        <td class="p-3.5 text-slate-300">${e.organizer?.name || 'N/A'}</td>
+                        <td class="p-3.5 text-slate-300 font-medium">${e.organizer?.name || 'N/A'}</td>
                         <td class="p-3.5 max-w-sm">
                             <div class="flex flex-wrap gap-1">${attendeesPills}</div>
                         </td>
@@ -1424,7 +1628,7 @@
             let icsContent = [
                 'BEGIN:VCALENDAR',
                 'VERSION:2.0',
-                'PRODID:-//SE Calendar Studio//Batch Generator v3.0//EN',
+                'PRODID:-//SE Calendar Studio//Batch Generator v3.2//EN',
                 'CALSCALE:GREGORIAN',
                 'METHOD:PUBLISH'
             ];
@@ -1455,7 +1659,8 @@
                 if (evt.attendees && evt.attendees.length > 0) {
                     evt.attendees.forEach(a => {
                         const status = a.responseStatus || (a.email === evt.organizer?.email ? 'ACCEPTED' : 'NEEDS-ACTION');
-                        icsContent.push(`ATTENDEE;CN=${a.name};PARTSTAT=${status};RSVP=TRUE:MAILTO:${a.email}`);
+                        const role = a.role || (a.isReq ? 'REQ-PARTICIPANT' : 'OPT-PARTICIPANT');
+                        icsContent.push(`ATTENDEE;CN=${a.name};ROLE=${role};PARTSTAT=${status};RSVP=TRUE:MAILTO:${a.email}`);
                     });
                 }
 
