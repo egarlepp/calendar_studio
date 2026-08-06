@@ -121,7 +121,7 @@
                         </div>
 
                         <!-- Generation Volume & Rules -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 items-end">
                             <div>
                                 <label class="block text-xs font-medium text-slate-300 mb-1">
                                     Target Work Meetings
@@ -131,15 +131,22 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-300 mb-1">
+                                    Min Meetings / Day
+                                    <span class="text-slate-500 block text-[10px] font-normal">Min daily target</span>
+                                </label>
+                                <input type="number" id="input-min-daily" value="2" min="0" max="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 focus:outline-none focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">
                                     Max Meetings / Day
                                     <span class="text-slate-500 block text-[10px] font-normal">Prevents daily overload</span>
                                 </label>
-                                <input type="number" id="input-max-daily" value="5" min="1" max="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 focus:outline-none focus:border-sky-500">
+                                <input type="number" id="input-max-daily" value="6" min="1" max="12" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 focus:outline-none focus:border-sky-500">
                             </div>
-                            <div class="flex items-center pt-5">
-                                <label class="relative flex items-center gap-2 cursor-pointer select-none">
+                            <div class="flex items-center pb-2">
+                                <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
                                     <input type="checkbox" id="input-daily-lunch" checked class="sr-only peer">
-                                    <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                                    <div class="relative w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
                                     <span class="text-xs font-medium text-slate-300">Auto Daily Lunch Break</span>
                                 </label>
                             </div>
@@ -1248,8 +1255,12 @@
             const startDateInput = document.getElementById('input-start-date').value;
             const endDateInput = document.getElementById('input-end-date').value;
             const targetTotalWork = parseInt(document.getElementById('input-target-count').value, 10) || 50;
-            const maxDailyMeetings = parseInt(document.getElementById('input-max-daily').value, 10) || 5;
+            const minDailyMeetings = parseInt(document.getElementById('input-min-daily').value, 10) || 2;
+            const maxDailyMeetings = parseInt(document.getElementById('input-max-daily').value, 10) || 6;
             const includeDailyLunch = document.getElementById('input-daily-lunch').checked;
+
+            const effectiveMinDaily = Math.min(minDailyMeetings, maxDailyMeetings);
+            const effectiveMaxDaily = Math.max(minDailyMeetings, maxDailyMeetings);
 
             if (!startDateInput || !endDateInput) {
                 showToast('Please select valid start and end dates.');
@@ -1300,9 +1311,12 @@
 
             const newEvents = [];
             const daySchedules = {};
+            const dayCaps = {};
             businessDays.forEach(d => {
                 const key = d.toISOString().split('T')[0];
                 daySchedules[key] = [];
+                // Assign a randomized max meetings cap for each day between Min and Max settings
+                dayCaps[key] = Math.floor(Math.random() * (effectiveMaxDaily - effectiveMinDaily + 1)) + effectiveMinDaily;
             });
 
             // 1. Process Daily Lunch Breaks if checked
@@ -1342,15 +1356,29 @@
             // 2. Distribute Work Meetings (Weighted Random Probability)
             let remainingWorkMeetings = targetTotalWork;
             let attempts = 0;
-            const maxAttempts = targetTotalWork * 15;
+            const maxAttempts = targetTotalWork * 25;
 
             while (remainingWorkMeetings > 0 && attempts < maxAttempts) {
                 attempts++;
-                const randomDay = businessDays[Math.floor(Math.random() * businessDays.length)];
+
+                // Pick eligible days that haven't reached their assigned daily cap
+                const eligibleDays = businessDays.filter(d => {
+                    const key = d.toISOString().split('T')[0];
+                    return daySchedules[key].length < dayCaps[key];
+                });
+
+                if (eligibleDays.length === 0) break;
+
+                // Prioritize days that haven't reached effectiveMinDaily yet
+                const underMinDays = eligibleDays.filter(d => {
+                    const key = d.toISOString().split('T')[0];
+                    return daySchedules[key].length < effectiveMinDaily;
+                });
+
+                const candidateDays = underMinDays.length > 0 ? underMinDays : eligibleDays;
+                const randomDay = candidateDays[Math.floor(Math.random() * candidateDays.length)];
                 const dayKey = randomDay.toISOString().split('T')[0];
                 const existing = daySchedules[dayKey];
-
-                if (existing.length >= maxDailyMeetings) continue;
 
                 const profile = workProfiles.length > 0 
                     ? getWeightedRandomProfile(workProfiles) 
