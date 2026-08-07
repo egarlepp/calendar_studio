@@ -28,6 +28,121 @@
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        html.light-mode,
+        body.light-mode {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        body.light-mode header {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-color: #e2e8f0;
+        }
+        body.light-mode .bg-slate-900,
+        body.light-mode .bg-slate-950 {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        body.light-mode .bg-slate-950\/80,
+        body.light-mode .bg-slate-950\/60,
+        body.light-mode .bg-slate-900\/50,
+        body.light-mode .bg-slate-900\/90 {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+        body.light-mode .text-white,
+        body.light-mode .text-slate-100,
+        body.light-mode .text-slate-200 {
+            color: #0f172a !important;
+        }
+        body.light-mode .text-slate-300,
+        body.light-mode .text-slate-400 {
+            color: #334155 !important;
+        }
+        body.light-mode input,
+        body.light-mode select,
+        body.light-mode textarea {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        body.light-mode .border-slate-800,
+        body.light-mode .border-slate-800\/80,
+        body.light-mode .border-slate-800\/60 {
+            border-color: #e2e8f0 !important;
+        }
+        body.light-mode .bg-slate-800 {
+            background-color: #e2e8f0 !important;
+            color: #1e293b !important;
+            border-color: #cbd5e1 !important;
+        }
+        body.light-mode .hover\:bg-slate-800:hover,
+        body.light-mode .hover\:bg-slate-700:hover {
+            background-color: #cbd5e1 !important;
+        }
+        body.light-mode .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]) {
+            border-color: #e2e8f0 !important;
+        }
+        body.light-mode ::-webkit-scrollbar-track { background: #f1f5f9; }
+        body.light-mode ::-webkit-scrollbar-thumb { background: #cbd5e1; }
+
+        /* Toggle switch state explicit overrides for light mode */
+        body.light-mode input:checked + .toggle-slider {
+            background-color: #059669 !important; /* emerald-600 */
+        }
+        body.light-mode input:not(:checked) + .toggle-slider {
+            background-color: #cbd5e1 !important; /* slate-300 */
+        }
+
+        /* Action Launch Card Light Mode Override */
+        body.light-mode .action-launch-card {
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%) !important;
+            border-color: #7dd3fc !important;
+            box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.15) !important;
+        }
+        body.light-mode .action-launch-card h3 {
+            color: #0369a1 !important;
+        }
+        body.light-mode .action-launch-card p {
+            color: #334155 !important;
+        }
+
+        /* Preset buttons light mode styling */
+        body.light-mode .preset-pill-active {
+            background-color: #0284c7 !important; /* sky-600 */
+            color: #ffffff !important;
+            border-color: #0284c7 !important;
+            font-weight: 700 !important;
+        }
+        body.light-mode .preset-pill-inactive {
+            background-color: #e2e8f0 !important;
+            color: #334155 !important;
+            border-color: #cbd5e1 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Calendar modal light mode explicit text & cell contrast overrides */
+        body.light-mode .cal-day-in-range {
+            background-color: #bae6fd !important; /* sky-200 */
+            color: #0369a1 !important; /* sky-700 */
+            border-color: #38bdf8 !important; /* sky-400 */
+            font-weight: 700 !important;
+        }
+        body.light-mode .cal-day-normal {
+            color: #0f172a !important;
+            font-weight: 600 !important;
+        }
+        body.light-mode .cal-day-normal:hover {
+            background-color: #cbd5e1 !important;
+        }
+        body.light-mode .cal-day-weekend {
+            color: #94a3b8 !important;
+        }
+        body.light-mode .cal-header-day {
+            color: #475569 !important;
+            font-weight: 700 !important;
+        }
     </style>
 </head>
 <body class="h-full flex flex-col bg-slate-950 text-slate-100 antialiased overflow-x-hidden">
@@ -42,13 +157,20 @@
             <div>
                 <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
                     SE Calendar Studio
-                    <span class="text-[10px] font-semibold bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full border border-sky-500/20">v3.2</span>
+                    <span class="text-[10px] font-semibold bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full border border-sky-500/20">v3.6</span>
                 </h1>
                 <p class="text-xs text-slate-400 hidden sm:block">Batch SE Event Generator & Outlook .ICS Export Engine</p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
+            <!-- Theme Toggle Button (Light/Dark Mode) -->
+            <button id="theme-toggle-btn" onclick="toggleTheme()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-700 transition cursor-pointer" title="Toggle Light/Dark Theme">
+                <svg id="theme-toggle-sun" class="w-3.5 h-3.5 text-amber-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="theme-toggle-moon" class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                <span id="theme-toggle-text">Dark</span>
+            </button>
+
             <div id="cloud-status-pill" class="flex items-center gap-1.5 bg-slate-900 text-xs text-emerald-400 font-medium px-3 py-1.5 rounded-lg border border-emerald-500/30 shadow-inner">
                 <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span id="cloud-status-text">Saved Locally</span>
@@ -102,21 +224,32 @@
                                 <span class="w-2 h-2 rounded-full bg-sky-400"></span>
                                 Schedule Timeline & Workday Constraints
                             </h2>
-                            <div class="flex gap-2">
-                                <button type="button" onclick="setPresetRange('2w')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-2.5 py-1 rounded border border-slate-700">2 Weeks</button>
-                                <button type="button" onclick="setPresetRange('1m')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-2.5 py-1 rounded border border-slate-700">1 Month</button>
-                                <button type="button" onclick="setPresetRange('3m')" class="text-[11px] bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 font-semibold px-2.5 py-1 rounded border border-sky-500/30">3 Months (Quarter)</button>
+                            <div class="flex gap-2" id="preset-pills-container">
+                                <button type="button" id="preset-btn-2w" onclick="setPresetRange('2w')" class="preset-pill text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-2.5 py-1 rounded border border-slate-700 transition">2 Weeks</button>
+                                <button type="button" id="preset-btn-1m" onclick="setPresetRange('1m')" class="preset-pill text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-2.5 py-1 rounded border border-slate-700 transition">1 Month</button>
+                                <button type="button" id="preset-btn-3m" onclick="setPresetRange('3m')" class="preset-pill text-[11px] bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 font-semibold px-2.5 py-1 rounded border border-sky-500/30 transition">3 Months (Quarter)</button>
+                                <button type="button" id="preset-btn-custom" onclick="openCustomCalendarModal('input-start-date')" class="preset-pill text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-2.5 py-1 rounded border border-slate-700 transition">Custom</button>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-300 mb-1.5">Start Date</label>
-                                <input type="date" id="input-start-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500 transition">
+                                <div class="relative flex items-center">
+                                    <input type="date" id="input-start-date" onchange="onDateInputChange()" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3.5 pr-10 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500 transition">
+                                    <button type="button" onclick="openCustomCalendarModal('input-start-date')" class="absolute right-2.5 text-slate-400 hover:text-sky-400 p-1 transition" title="Open In-App Calendar Picker">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </button>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-300 mb-1.5">End Date</label>
-                                <input type="date" id="input-end-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500 transition">
+                                <div class="relative flex items-center">
+                                    <input type="date" id="input-end-date" onchange="onDateInputChange()" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3.5 pr-10 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500 transition">
+                                    <button type="button" onclick="openCustomCalendarModal('input-end-date')" class="absolute right-2.5 text-slate-400 hover:text-sky-400 p-1 transition" title="Open In-App Calendar Picker">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -146,7 +279,7 @@
                             <div class="flex items-center pb-2">
                                 <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
                                     <input type="checkbox" id="input-daily-lunch" checked class="sr-only peer">
-                                    <div class="relative w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                                    <div class="toggle-slider relative w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
                                     <span class="text-xs font-medium text-slate-300">Auto Daily Lunch Break</span>
                                 </label>
                             </div>
@@ -197,7 +330,6 @@
                     </div>
                 </div>
 
-                <!-- Right 1 Col: Primary User, Attendees & Action -->
                 <div class="space-y-6">
                     
                     <!-- Primary User Target Card -->
@@ -220,19 +352,53 @@
                                     <!-- Dynamic options -->
                                 </select>
                             </div>
+
+                            <!-- 1. Organizer vs Attendee Role Split Slider -->
+                            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-semibold text-slate-200">Organizer vs Attendee Split</span>
+                                    <div class="flex items-center gap-2 font-mono text-[11px]">
+                                        <span id="primary-org-label" class="text-amber-400 font-bold">ORG: 50%</span>
+                                        <span class="text-slate-600">|</span>
+                                        <span id="primary-att-label" class="text-sky-400 font-bold">ATT: 50%</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="primary-user-org-slider" min="0" max="100" value="50" 
+                                       oninput="updatePrimaryUserOrgSliderLabels(this.value); saveStateLocally()"
+                                       class="w-full accent-amber-500 bg-slate-900 rounded h-1.5 border border-slate-800">
+                                <p class="text-[10px] text-slate-400">Determines ratio of meetings Primary User organizes vs attends.</p>
+                            </div>
+
+                            <!-- 2. Default Response Status Split Slider (Accept vs Tentative) -->
                             <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
                                 <div class="flex items-center justify-between text-xs">
                                     <span class="font-semibold text-slate-200">Default Response Status Split</span>
                                     <div class="flex items-center gap-2 font-mono text-[11px]">
-                                        <span id="primary-accepted-label" class="text-emerald-400 font-bold">ACC: 90%</span>
+                                        <span id="primary-accepted-label" class="text-emerald-400 font-bold">ACC: 80%</span>
                                         <span class="text-slate-600">|</span>
-                                        <span id="primary-tentative-label" class="text-amber-400 font-bold">TEN: 10%</span>
+                                        <span id="primary-tentative-label" class="text-amber-400 font-bold">TEN: 20%</span>
                                     </div>
                                 </div>
-                                <input type="range" id="primary-user-accepted-slider" min="0" max="100" value="90" 
+                                <input type="range" id="primary-user-accepted-slider" min="0" max="100" value="80" 
                                        oninput="updatePrimaryUserSliderLabels(this.value); saveStateLocally()"
                                        class="w-full accent-emerald-500 bg-slate-900 rounded h-1.5 border border-slate-800">
-                                <p class="text-[10px] text-slate-400">Determines likelihood of Primary User status being Accepted vs Tentative across generated meetings.</p>
+                                <p class="text-[10px] text-slate-400">Determines ratio of Accepted vs Tentative status for Primary User when attending meetings.</p>
+                            </div>
+
+                            <!-- 3. Invite Role Ratio Split Slider (Required vs Optional) -->
+                            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-semibold text-slate-200">Invite Role Ratio Split</span>
+                                    <div class="flex items-center gap-2 font-mono text-[11px]">
+                                        <span id="primary-req-label" class="text-sky-400 font-bold">REQ: 80%</span>
+                                        <span class="text-slate-600">|</span>
+                                        <span id="primary-opt-label" class="text-purple-400 font-bold">OPT: 20%</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="primary-user-req-slider" min="0" max="100" value="80" 
+                                       oninput="updatePrimaryUserReqSliderLabels(this.value); saveStateLocally()"
+                                       class="w-full accent-sky-500 bg-slate-900 rounded h-1.5 border border-slate-800">
+                                <p class="text-[10px] text-slate-400">Determines ratio of Required (REQ) vs Optional (OPT) role for Primary User when attending meetings.</p>
                             </div>
                         </div>
                     </div>
@@ -261,7 +427,7 @@
                     </div>
 
                     <!-- Main Generation Launch Action -->
-                    <div class="bg-gradient-to-br from-slate-900 to-sky-950 rounded-2xl border border-sky-500/30 p-6 shadow-2xl space-y-4">
+                    <div class="action-launch-card bg-gradient-to-br from-slate-900 to-sky-950 rounded-2xl border border-sky-500/30 p-6 shadow-2xl space-y-4">
                         <h3 class="text-base font-bold text-white flex items-center gap-2">
                             <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                             Ready to Build Schedule?
@@ -383,6 +549,72 @@
 
     </main>
 
+    <!-- CUSTOM CALENDAR PICKER MODAL -->
+    <div id="modal-custom-calendar" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Select Custom Date Range
+                    </h3>
+                    <p class="text-xs text-slate-400">Click a Start Date and an End Date on the calendar grid</p>
+                </div>
+                <button onclick="closeModal('modal-custom-calendar')" class="text-slate-400 hover:text-white text-lg">✕</button>
+            </div>
+
+            <!-- Month Navigator -->
+            <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                <button onclick="navCalendarMonth(-1)" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <span id="cal-month-title" class="text-sm font-bold text-white font-mono">August 2026</span>
+                <button onclick="navCalendarMonth(1)" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+
+            <!-- Quick Preset Shortcuts Inside Modal -->
+            <div class="flex flex-wrap gap-2 text-[11px]">
+                <button onclick="applyCalPreset('2w')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-medium">Next 2 Weeks</button>
+                <button onclick="applyCalPreset('1m')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-medium">Next 1 Month</button>
+                <button onclick="applyCalPreset('3m')" class="bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 px-2.5 py-1 rounded-lg border border-sky-500/30 font-semibold">Next Quarter (3M)</button>
+            </div>
+
+            <!-- Calendar Days Grid -->
+            <div>
+                <div class="grid grid-cols-7 gap-1 text-center font-mono text-[11px] font-bold text-slate-400 cal-header-day mb-2">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+                <div id="cal-days-grid" class="grid grid-cols-7 gap-1 text-xs">
+                    <!-- Dynamic Grid -->
+                </div>
+            </div>
+
+            <!-- Selection Readout Bar -->
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs font-mono">
+                <div>
+                    <span class="text-slate-400 block text-[10px]">Start Date</span>
+                    <span id="cal-readout-start" class="text-sky-400 font-bold">---</span>
+                </div>
+                <div class="text-slate-600">➔</div>
+                <div>
+                    <span class="text-slate-400 block text-[10px]">End Date</span>
+                    <span id="cal-readout-end" class="text-sky-400 font-bold">---</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px]">Business Days</span>
+                    <span id="cal-readout-bdays" class="text-emerald-400 font-bold">0 Days</span>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="closeModal('modal-custom-calendar')" class="px-4 py-2 text-xs text-slate-400 hover:text-slate-200">Cancel</button>
+                <button type="button" onclick="applyCustomCalendarRange()" class="px-5 py-2 text-xs bg-sky-600 hover:bg-sky-500 font-bold text-white rounded-xl shadow">Apply Date Range</button>
+            </div>
+        </div>
+    </div>
+
     <!-- DOMAIN SETTINGS MODAL -->
     <div id="modal-domain" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
@@ -435,7 +667,7 @@
                     </div>
                 </div>
 
-                <!-- Guest Domain Selector (Shown when Role Type is External) -->
+                <!-- Guest Domain Selector -->
                 <div id="guest-domain-container" class="hidden">
                     <label class="block text-xs font-medium text-slate-300 mb-1">Guest Client Domain</label>
                     <select id="member-guest-domain" onchange="autoGenerateMemberEmail()" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-300 rounded-xl px-3 py-2.5 focus:outline-none">
@@ -539,7 +771,287 @@
         let companyDomain = 'securwrix.com';
         let externalDomains = ['testing.com', 'acemcorp.com', 'apex-corp.com', 'vanguard-tech.io', 'summit-systems.net', 'hyper-solutions.org'];
         let primaryUserId = 'mem_1'; // Default target user forced onto all meetings
-        let primaryUserAcceptedWeight = 90; // Default 90% Accepted, 10% Tentative
+        let primaryUserAcceptedWeight = 80; // Default 80% Accepted, 20% Tentative
+        let primaryUserReqWeight = 80; // Default 80% Required, 20% Optional
+        let primaryUserOrgWeight = 50; // Default 50% Organizer, 50% Attendee
+        let selectedDurations = [15, 30, 45, 60, 90, 120];
+        let generatedEvents = [];
+        let currentTheme = 'dark';
+        let currentPreset = '3m';
+
+        // Custom Calendar Modal State
+        let calCurrentYear = new Date().getFullYear();
+        let calCurrentMonth = new Date().getMonth();
+        let calTempStartDate = null;
+        let calTempEndDate = null;
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('se_calendar_studio_theme') || 'dark';
+            applyTheme(savedTheme);
+        }
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+            localStorage.setItem('se_calendar_studio_theme', newTheme);
+            showToast(`Switched to ${newTheme === 'light' ? 'Light' : 'Dark'} Mode`);
+        }
+
+        function applyTheme(theme) {
+            currentTheme = theme;
+            const sunIcon = document.getElementById('theme-toggle-sun');
+            const moonIcon = document.getElementById('theme-toggle-moon');
+            const textEl = document.getElementById('theme-toggle-text');
+
+            if (theme === 'light') {
+                document.documentElement.classList.add('light-mode');
+                document.body.classList.add('light-mode');
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+                if (textEl) textEl.textContent = 'Light';
+            } else {
+                document.documentElement.classList.remove('light-mode');
+                document.body.classList.remove('light-mode');
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+                if (textEl) textEl.textContent = 'Dark';
+            }
+        }
+
+        function openCustomCalendarModal(targetInputId) {
+            updatePresetPillsUI('custom');
+            
+            const startVal = document.getElementById('input-start-date').value;
+            const endVal = document.getElementById('input-end-date').value;
+
+            calTempStartDate = startVal ? new Date(startVal + 'T00:00:00') : new Date();
+            calTempEndDate = endVal ? new Date(endVal + 'T00:00:00') : new Date(calTempStartDate.getTime() + 90 * 86400000);
+
+            calCurrentYear = calTempStartDate.getFullYear();
+            calCurrentMonth = calTempStartDate.getMonth();
+
+            renderCustomCalendar();
+            const modal = document.getElementById('modal-custom-calendar');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function navCalendarMonth(delta) {
+            calCurrentMonth += delta;
+            if (calCurrentMonth < 0) {
+                calCurrentMonth = 11;
+                calCurrentYear--;
+            } else if (calCurrentMonth > 11) {
+                calCurrentMonth = 0;
+                calCurrentYear++;
+            }
+            renderCustomCalendar();
+        }
+
+        function applyCalPreset(preset) {
+            const today = new Date();
+            const start = new Date(today);
+            if (start.getDay() === 0) start.setDate(start.getDate() + 1);
+            if (start.getDay() === 6) start.setDate(start.getDate() + 2);
+
+            const end = new Date(start);
+            if (preset === '2w') end.setDate(start.getDate() + 14);
+            else if (preset === '1m') end.setMonth(start.getMonth() + 1);
+            else if (preset === '3m') end.setMonth(start.getMonth() + 3);
+
+            calTempStartDate = start;
+            calTempEndDate = end;
+            calCurrentYear = start.getFullYear();
+            calCurrentMonth = start.getMonth();
+            renderCustomCalendar();
+        }
+
+        function selectCalDate(dateStr) {
+            const clicked = new Date(dateStr + 'T00:00:00');
+            
+            if (!calTempStartDate || (calTempStartDate && calTempEndDate)) {
+                calTempStartDate = clicked;
+                calTempEndDate = null;
+            } else if (clicked < calTempStartDate) {
+                calTempStartDate = clicked;
+                calTempEndDate = null;
+            } else {
+                calTempEndDate = clicked;
+            }
+            renderCustomCalendar();
+        }
+
+        function renderCustomCalendar() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const titleEl = document.getElementById('cal-month-title');
+            if (titleEl) titleEl.textContent = `${monthNames[calCurrentMonth]} ${calCurrentYear}`;
+
+            const grid = document.getElementById('cal-days-grid');
+            if (!grid) return;
+
+            grid.innerHTML = '';
+
+            const firstDay = new Date(calCurrentYear, calCurrentMonth, 1).getDay();
+            const daysInMonth = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+
+            // Leading blank days
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="p-2 text-center text-slate-700 select-none">•</div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateObj = new Date(calCurrentYear, calCurrentMonth, day);
+                const yearStr = dateObj.getFullYear();
+                const monthStr = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const dayStr = String(day).padStart(2, '0');
+                const isoStr = `${yearStr}-${monthStr}-${dayStr}`;
+
+                let isStart = calTempStartDate && calTempStartDate.toISOString().split('T')[0] === isoStr;
+                let isEnd = calTempEndDate && calTempEndDate.toISOString().split('T')[0] === isoStr;
+                let inRange = calTempStartDate && calTempEndDate && dateObj > calTempStartDate && dateObj < calTempEndDate;
+
+                let isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
+
+                let cellClass = "p-2 text-center rounded-lg font-medium cursor-pointer transition select-none ";
+
+                if (isStart || isEnd) {
+                    cellClass += "bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold shadow-md scale-105 ";
+                } else if (inRange) {
+                    cellClass += "cal-day-in-range bg-sky-500/20 text-sky-200 border border-sky-500/30 ";
+                } else if (isWeekend) {
+                    cellClass += "cal-day-weekend text-slate-600 hover:bg-slate-800/40 ";
+                } else {
+                    cellClass += "cal-day-normal text-slate-200 hover:bg-slate-800 hover:text-white ";
+                }
+
+                grid.innerHTML += `
+                    <button type="button" onclick="selectCalDate('${isoStr}')" class="${cellClass}">
+                        ${day}
+                    </button>
+                `;
+            }
+
+            // Update Readout Bar
+            const rStart = document.getElementById('cal-readout-start');
+            const rEnd = document.getElementById('cal-readout-end');
+            const rBdays = document.getElementById('cal-readout-bdays');
+
+            if (rStart) rStart.textContent = calTempStartDate ? calTempStartDate.toISOString().split('T')[0] : '---';
+            if (rEnd) rEnd.textContent = calTempEndDate ? calTempEndDate.toISOString().split('T')[0] : 'Select End Date';
+
+            if (calTempStartDate && calTempEndDate) {
+                let count = 0;
+                let curr = new Date(calTempStartDate);
+                while (curr <= calTempEndDate) {
+                    if (curr.getDay() !== 0 && curr.getDay() !== 6) count++;
+                    curr.setDate(curr.getDate() + 1);
+                }
+                if (rBdays) rBdays.textContent = `${count} Weekdays`;
+            } else {
+                if (rBdays) rBdays.textContent = '---';
+            }
+        }
+
+        function applyCustomCalendarRange() {
+            if (!calTempStartDate) {
+                showToast('Please select a start date.');
+                return;
+            }
+            if (!calTempEndDate) {
+                calTempEndDate = new Date(calTempStartDate.getTime() + 14 * 86400000);
+            }
+
+            const startISO = calTempStartDate.toISOString().split('T')[0];
+            const endISO = calTempEndDate.toISOString().split('T')[0];
+
+            const startInput = document.getElementById('input-start-date');
+            const endInput = document.getElementById('input-end-date');
+
+            if (startInput) startInput.value = startISO;
+            if (endInput) endInput.value = endISO;
+
+            updatePresetPillsUI('custom');
+            closeModal('modal-custom-calendar');
+            showToast(`Applied date range: ${startISO} to ${endISO}`);
+        }
+
+        function onDateInputChange() {
+            updatePresetPillsUI('custom');
+        }
+
+        function updatePresetPillsUI(activePreset) {
+            currentPreset = activePreset;
+            const presets = ['2w', '1m', '3m', 'custom'];
+            
+            presets.forEach(p => {
+                const btn = document.getElementById(`preset-btn-${p}`);
+                if (!btn) return;
+                
+                if (p === activePreset) {
+                    btn.className = "preset-pill preset-pill-active text-[11px] bg-sky-600 text-white font-bold px-2.5 py-1 rounded border border-sky-500/30 shadow-sm transition";
+                } else {
+                    btn.className = "preset-pill preset-pill-inactive text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-2.5 py-1 rounded border border-slate-700 transition";
+                }
+            });
+        }
+
+        function setPresetRange(preset) {
+            if (preset === 'custom') {
+                openCustomCalendarModal('input-start-date');
+                return;
+            }
+
+            const today = new Date();
+            const startDateInput = document.getElementById('input-start-date');
+            const endDateInput = document.getElementById('input-end-date');
+            if (!startDateInput || !endDateInput) return;
+
+            const start = new Date(today);
+            if (start.getDay() === 0) start.setDate(start.getDate() + 1);
+            if (start.getDay() === 6) start.setDate(start.getDate() + 2);
+
+            const end = new Date(start);
+
+            if (preset === '2w') {
+                end.setDate(start.getDate() + 14);
+            } else if (preset === '1m') {
+                end.setMonth(start.getMonth() + 1);
+            } else if (preset === '3m') {
+                end.setMonth(start.getMonth() + 3);
+            }
+
+            startDateInput.value = start.toISOString().split('T')[0];
+            endDateInput.value = end.toISOString().split('T')[0];
+
+            updatePresetPillsUI(preset);
+        }
+
+        let teamMembers = [
+            { id: 'mem_1', name: 'Alex Rivera', role: 'Sr. Solutions Engineer', type: 'se', email: 'alex.rivera@securwrix.com', isExternal: false, reqWeight: 80 },
+            { id: 'mem_2', name: 'Jordan Smith', role: 'Solutions Engineer', type: 'se', email: 'jordan.smith@securwrix.com', isExternal: false, reqWeight: 80 },
+            { id: 'mem_3', name: 'Sarah Chen', role: 'Enterprise AE', type: 'sales', email: 'sarah.chen@securwrix.com', isExternal: false, reqWeight: 85 },
+            { id: 'mem_4', name: 'Elena Rostova', role: 'VP of Tech Ops', type: 'external', guestDomain: 'acemcorp.com', email: 'elena.rostova@acemcorp.com', isExternal: true, reqWeight: 75 },
+            { id: 'mem_5', name: 'David Miller', role: 'Director of Security', type: 'external', guestDomain: 'testing.com', email: 'david.miller@testing.com', isExternal: true, reqWeight: 70 }
+        ];
+
+        let activityProfiles = [
+            { id: 'act_w1', name: 'Discovery Session', prefix: '[DISC]', category: 'work', defaultMins: 60, weight: 80 },
+            { id: 'act_w2', name: 'Technical POC Support', prefix: '[POC]', category: 'work', defaultMins: 60, weight: 75 },
+            { id: 'act_w3', name: 'RFP Technical Deep Dive', prefix: '[RFP]', category: 'work', defaultMins: 60, weight: 85 },
+            { id: 'act_w4', name: 'Technical Enablement', prefix: '[ENABLE]', category: 'work', defaultMins: 45, weight: 60 },
+            { id: 'act_w5', name: 'Product Demo', prefix: '[DEMO]', category: 'work', defaultMins: 45, weight: 90 },
+            { id: 'act_w6', name: 'Executive Briefing', prefix: '[EBR]', category: 'work', defaultMins: 60, weight: 50 },
+            { id: 'act_w7', name: '1-on-1 SE Sync', prefix: '[1:1]', category: 'work', defaultMins: 30, weight: 95 },
+            { id: 'act_w8', name: 'Opportunity Closeout', prefix: '[CLOSE]', category: 'work', defaultMins: 45, weight: 65 },
+            { id: 'act_w9', name: 'Kickoff Call', prefix: '[KICK]', category: 'work', defaultMins: 45, weight: 70 },
+            { id: 'act_w10', name: 'Marketing Sync', prefix: '[MKTG]', category: 'work', defaultMins: 30, weight: 55 },
+            { id: 'act_w11', name: 'HealthCheck', prefix: '[HLTH]', category: 'work', defaultMins: 45, weight: 60 },
+            { id: 'act_w12', name: 'EvalWork Session', prefix: '[EVAL]', category: 'work', defaultMins: 60, weight: 70 },
+            { id: 'act_p1', name: 'Lunch Break', prefix: '[LUNCH]', category: 'personal', defaultMins: 45, weight: 35 },
+            { id: 'act_p2', name: 'Doctor Appt', prefix: '[DOC]', category: 'personal', defaultMins: 60, weight: 15 },
+            { id: 'act_p3', name: 'Haircut / Errand', prefix: '[ERRAND]', category: 'personal', defaultMins: 30, weight: 20 },
+            { id: 'act_p4', name: 'Business Travel', prefix: '[TRAVEL]', category: 'personal', defaultMins: 600, weight: 10, isFullDay: true },
+            { id: 'act_p5', name: 'PTO / Vacation', prefix: '[PTO]', category: 'personal', defaultMins: 600, weight: 5, isFullDay: true }
+        ];
 
         function getRandomResponseStatus(isOrganizer = false) {
             if (isOrganizer) return 'ACCEPTED';
@@ -550,11 +1062,6 @@
             return 'DECLINED';
         }
 
-        function getPrimaryUserResponseStatus() {
-            const roll = Math.random() * 100;
-            return roll < primaryUserAcceptedWeight ? 'ACCEPTED' : 'TENTATIVE';
-        }
-
         function generateEventDescription(prefix, title, organizer, attendees, category) {
             const teamsId = Math.random().toString(36).substring(2, 11);
             const joinLink = `https://teams.microsoft.com/l/meetup-join/19%3ameeting_${teamsId}%40thread.v2/0`;
@@ -563,93 +1070,31 @@
                 return `[Personal Calendar Entry]\nSubject: ${title}\nOrganizer: ${organizer.name} (${organizer.email})\nNote: Reserved time on calendar.`;
             }
 
-            const attendeeList = attendees.map(a => `- ${a.name} (${a.email}) [${a.isReq ? 'REQUIRED' : 'OPTIONAL'}]`).join('\n');
+            const attendeeList = attendees.map(a => `- ${a.name} (${a.email}) [${a.isReq ? 'REQUIRED' : 'OPTIONAL'}] - ${a.responseStatus || 'PENDING'}`).join('\n');
 
             return `Activity Type: ${prefix}\nSubject: ${title}\nOrganizer: ${organizer.name} (${organizer.email})\n\nParticipants:\n${attendeeList}\n\nMeeting Agenda:\n1. Scope & Objective Overview\n2. Technical Alignment & Solutions Review\n3. Action Items & Next Steps\n\n------------------------------\nMicrosoft Teams Meeting\nJoin Link: ${joinLink}`;
         }
 
-        let allowedDurations = [15, 30, 45, 60, 90, 120];
-        let selectedDurations = [30, 45, 60, 90];
-
-        // Generator helper for initial weights according to rules
-        function generateRandomWeight(profile) {
-            if (profile.id === 'act_p5' || profile.name.toLowerCase().includes('pto') || profile.name.toLowerCase().includes('vacation')) {
-                return Math.floor(Math.random() * 10) + 1; // 1 to 10 for PTO
-            }
-            if (profile.id === 'act_p6' || profile.name.toLowerCase().includes('travel')) {
-                return Math.floor(Math.random() * 15) + 1; // 1 to 15 for Travel
-            }
-            if (profile.category === 'personal') {
-                return Math.floor(Math.random() * 39) + 1; // 1 to 39 for Personal
-            }
-            return Math.floor(Math.random() * 61) + 40; // 40 to 100 for Work
+        function ensureActivityWeights() {
+            activityProfiles.forEach(a => {
+                if (a.weight === undefined) {
+                    if (a.id === 'act_p5' || a.prefix === '[PTO]') {
+                        a.weight = Math.floor(Math.random() * 10) + 1;
+                    } else if (a.category === 'personal') {
+                        a.weight = Math.floor(Math.random() * 39) + 1;
+                    } else {
+                        a.weight = Math.floor(Math.random() * 61) + 40;
+                    }
+                }
+            });
         }
 
-        // Default Activity Profiles
-        let activityProfiles = [
-            { id: 'act_w1', name: 'RFP Alignment', prefix: '[RFP]', defaultMins: 60, category: 'work', weight: 85 },
-            { id: 'act_w2', name: 'Technical POC Support', prefix: '[POC]', defaultMins: 120, category: 'work', weight: 65 },
-            { id: 'act_w3', name: 'Discovery Session', prefix: '[DISC]', defaultMins: 60, category: 'work', weight: 90 },
-            { id: 'act_w4', name: 'Technical Enablement', prefix: '[ENABLE]', defaultMins: 90, category: 'work', weight: 55 },
-            { id: 'act_w5', name: 'TCC Check-in', prefix: '[TCC]', defaultMins: 45, category: 'work', weight: 70 },
-            { id: 'act_w6', name: 'VRE Sync', prefix: '[VRE]', defaultMins: 60, category: 'work', weight: 50 },
-            { id: 'act_w7', name: 'Marketing Alignment', prefix: '[MKTG]', defaultMins: 45, category: 'work', weight: 45 },
-            { id: 'act_w8', name: 'HealthCheck', prefix: '[HEALTH]', defaultMins: 60, category: 'work', weight: 60 },
-            { id: 'act_w9', name: 'EvalWork', prefix: '[EVAL]', defaultMins: 90, category: 'work', weight: 75 },
-            { id: 'act_w10', name: 'Product Demo', prefix: '[DEMO]', defaultMins: 45, category: 'work', weight: 80 },
-            { id: 'act_w11', name: 'Executive Briefing', prefix: '[EBR]', defaultMins: 60, category: 'work', weight: 40 },
-            { id: 'act_w12', name: 'Account Closeout', prefix: '[CLOSE]', defaultMins: 45, category: 'work', weight: 50 },
-            { id: 'act_w13', name: 'Project Kickoff Call', prefix: '[KICKOFF]', defaultMins: 45, category: 'work', weight: 65 },
-
-            { id: 'act_p1', name: 'Lunch Break', prefix: '[LUNCH]', defaultMins: 45, category: 'personal', weight: 35 },
-            { id: 'act_p2', name: 'Doctor / Medical Appt', prefix: '[DOCTOR]', defaultMins: 60, category: 'personal', weight: 15 },
-            { id: 'act_p3', name: 'Haircut / Personal Errand', prefix: '[ERRAND]', defaultMins: 45, category: 'personal', weight: 20 },
-            { id: 'act_p4', name: 'Workout / Gym', prefix: '[FITNESS]', defaultMins: 60, category: 'personal', weight: 30 },
-            { id: 'act_p5', name: 'PTO / Vacation', prefix: '[PTO]', defaultMins: 600, category: 'personal', isFullDay: true, weight: 5 },
-            { id: 'act_p6', name: 'Business Travel', prefix: '[TRAVEL]', defaultMins: 600, category: 'personal', isFullDay: true, weight: 12 }
-        ];
-
-        // Default Team Members & Guests (with requiredWeight 0-100, optionalWeight = 100 - requiredWeight)
-        let teamMembers = [
-            { id: 'mem_1', name: 'Alex Rivera', role: 'Sr. Solutions Engineer', memberType: 'se', email: 'alex.rivera@securwrix.com', isExternal: false, requiredWeight: 90 },
-            { id: 'mem_2', name: 'Sarah Connor', role: 'Principal SE', memberType: 'se', email: 'sarah.connor@securwrix.com', isExternal: false, requiredWeight: 80 },
-            { id: 'mem_3', name: 'Michael Vance', role: 'Enterprise AE', memberType: 'sales', email: 'michael.vance@securwrix.com', isExternal: false, requiredWeight: 85 },
-            { id: 'mem_4', name: 'Jessica Chen', role: 'Lead SE', memberType: 'se', email: 'jessica.chen@securwrix.com', isExternal: false, requiredWeight: 75 },
-            { id: 'mem_5', name: 'David Miller', role: 'VP Sales', memberType: 'sales', email: 'david.miller@securwrix.com', isExternal: false, requiredWeight: 40 },
-            { id: 'mem_6', name: 'Robert Thorne', role: 'VP Infrastructure', memberType: 'external', email: 'r.thorne@testing.com', isExternal: true, requiredWeight: 70 },
-            { id: 'mem_7', name: 'Elena Rostova', role: 'Director IT Ops', memberType: 'external', email: 'elena.rostova@acemcorp.com', isExternal: true, requiredWeight: 60 }
-        ];
-
-        let generatedEvents = [];
-
-        const mockNames = ["Taylor Morgan", "Jordan Lee", "Chris Casey", "Morgan Vance", "Sam Harper", "Riley Quinn", "Avery Brooks"];
-
-        function initializeUI() {
-            loadSavedState();
-
-            const today = new Date();
-            const threeMonthsLater = new Date();
-            threeMonthsLater.setMonth(today.getMonth() + 3);
-
-            const startDateInput = document.getElementById('input-start-date');
-            const endDateInput = document.getElementById('input-end-date');
-
-            if (startDateInput && !startDateInput.value) {
-                startDateInput.value = today.toISOString().split('T')[0];
-            }
-            if (endDateInput && !endDateInput.value) {
-                endDateInput.value = threeMonthsLater.toISOString().split('T')[0];
-            }
-
-            updateDomainUI();
-            renderPrimaryUserSelector();
-            updatePrimaryUserSliderLabels(primaryUserAcceptedWeight);
-            renderDurationCheckboxes();
-            renderActivityCheckboxes();
-            renderActivityCards();
-            renderTeamCheckboxes();
-            renderTeamCards();
-            renderQueueTable();
+        function ensureMemberWeights() {
+            teamMembers.forEach(m => {
+                if (m.reqWeight === undefined) {
+                    m.reqWeight = 80;
+                }
+            });
         }
 
         function loadSavedState() {
@@ -662,7 +1107,9 @@
                     if (parsed.teamMembers) teamMembers = parsed.teamMembers;
                     if (parsed.activityProfiles) activityProfiles = parsed.activityProfiles;
                     if (parsed.primaryUserId) primaryUserId = parsed.primaryUserId;
-                    if (parsed.primaryUserAcceptedWeight !== undefined) primaryUserAcceptedWeight = parsed.parsedPrimaryUserAcceptedWeight || parsed.primaryUserAcceptedWeight;
+                    if (parsed.primaryUserAcceptedWeight !== undefined) primaryUserAcceptedWeight = parsed.primaryUserAcceptedWeight;
+                    if (parsed.primaryUserReqWeight !== undefined) primaryUserReqWeight = parsed.primaryUserReqWeight;
+                    if (parsed.primaryUserOrgWeight !== undefined) primaryUserOrgWeight = parsed.primaryUserOrgWeight;
                 }
             } catch (e) {
                 console.warn("LocalStorage load skipped:", e);
@@ -673,582 +1120,22 @@
 
         function saveStateLocally() {
             try {
-                const state = {
+                const payload = {
                     companyDomain,
                     externalDomains,
                     teamMembers,
                     activityProfiles,
                     primaryUserId,
-                    primaryUserAcceptedWeight
+                    primaryUserAcceptedWeight,
+                    primaryUserReqWeight,
+                    primaryUserOrgWeight
                 };
-                localStorage.setItem('se_calendar_studio_data', JSON.stringify(state));
-                if (window.saveToCloud) window.saveToCloud();
+                localStorage.setItem('se_calendar_studio_data', JSON.stringify(payload));
+                const statusText = document.getElementById('cloud-status-text');
+                if (statusText) statusText.textContent = 'Saved Locally';
             } catch (e) {
-                console.warn("Could not save to localStorage:", e);
+                console.warn("Save state failed:", e);
             }
-        }
-
-        function ensureActivityWeights() {
-            activityProfiles.forEach(act => {
-                if (act.weight === undefined) {
-                    act.weight = generateRandomWeight(act);
-                }
-            });
-        }
-
-        function ensureMemberWeights() {
-            teamMembers.forEach(m => {
-                if (m.requiredWeight === undefined) {
-                    m.requiredWeight = 80;
-                }
-            });
-        }
-
-        function renderPrimaryUserSelector() {
-            const select = document.getElementById('primary-user-select');
-            if (!select) return;
-            const internalMembers = teamMembers.filter(m => !m.isExternal);
-            
-            // Check if primaryUserId exists
-            if (!teamMembers.some(m => m.id === primaryUserId) && internalMembers.length > 0) {
-                primaryUserId = internalMembers[0].id;
-            }
-
-            select.innerHTML = internalMembers.map(m => `
-                <option value="${m.id}" ${m.id === primaryUserId ? 'selected' : ''}>
-                    ${m.name} (${m.role}) - ${m.email}
-                </option>
-            `).join('');
-        }
-
-        function updatePrimaryUser(id) {
-            primaryUserId = id;
-            saveStateLocally();
-            renderTeamCards();
-            renderTeamCheckboxes();
-            showToast('Primary Target User set!');
-        }
-
-        function updatePrimaryUserSliderLabels(val) {
-            const accVal = parseInt(val, 10);
-            primaryUserAcceptedWeight = accVal;
-            const slider = document.getElementById('primary-user-accepted-slider');
-            if (slider && parseInt(slider.value, 10) !== accVal) slider.value = accVal;
-            const accLabel = document.getElementById('primary-accepted-label');
-            const tenLabel = document.getElementById('primary-tentative-label');
-            if (accLabel) accLabel.textContent = `ACC: ${accVal}%`;
-            if (tenLabel) tenLabel.textContent = `TEN: ${100 - accVal}%`;
-        }
-
-        function rerollActivityWeights() {
-            activityProfiles.forEach(act => {
-                act.weight = generateRandomWeight(act);
-            });
-            renderActivityCards();
-            renderActivityCheckboxes();
-            saveStateLocally();
-            showToast('Rerolled activity frequency weights!');
-        }
-
-        function updateActivityWeight(id, newWeight) {
-            const act = activityProfiles.find(a => a.id === id);
-            if (act) {
-                act.weight = parseInt(newWeight, 10);
-                saveStateLocally();
-                renderActivityCheckboxes();
-            }
-        }
-
-        function getWeightedRandomProfile(profilesList) {
-            if (!profilesList || profilesList.length === 0) return null;
-            const totalWeight = profilesList.reduce((sum, p) => sum + (p.weight || 50), 0);
-            if (totalWeight <= 0) return profilesList[Math.floor(Math.random() * profilesList.length)];
-            
-            let randomVal = Math.random() * totalWeight;
-            for (const profile of profilesList) {
-                const w = profile.weight || 50;
-                if (randomVal < w) return profile;
-                randomVal -= w;
-            }
-            return profilesList[profilesList.length - 1];
-        }
-
-        function populateGuestDomainDropdown() {
-            const select = document.getElementById('member-guest-domain');
-            if (!select) return;
-            select.innerHTML = externalDomains.map(d => `<option value="${d}">@${d}</option>`).join('');
-        }
-
-        function generateRandomEmailLocalPart(fullName) {
-            if (!fullName || !fullName.trim()) return 'user';
-            const clean = fullName.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
-            const parts = clean.split(/\s+/).filter(Boolean);
-
-            if (parts.length === 0) return 'user';
-            if (parts.length === 1) return parts[0];
-
-            const first = parts[0];
-            const last = parts[parts.length - 1];
-            const firstInitial = first.charAt(0);
-
-            const formats = [
-                `${first}.${last}`,
-                `${firstInitial}.${last}`,
-                `${last}`,
-                `${first}`,
-                `${first}_${last}`,
-                `${firstInitial}${last}`
-            ];
-
-            return formats[Math.floor(Math.random() * formats.length)];
-        }
-
-        function autoGenerateMemberEmail(forceNewFormat = false) {
-            const nameInput = document.getElementById('member-name');
-            const emailInput = document.getElementById('member-email');
-            const memberType = document.getElementById('member-type').value;
-            const guestDomainSelect = document.getElementById('member-guest-domain');
-
-            if (!nameInput || !emailInput) return;
-            const fullName = nameInput.value.trim();
-            if (!fullName) return;
-
-            let targetDomain = companyDomain;
-            if (memberType === 'external' && guestDomainSelect && guestDomainSelect.value) {
-                targetDomain = guestDomainSelect.value;
-            }
-
-            if (forceNewFormat || emailInput.dataset.manualEdit !== 'true') {
-                const localPart = generateRandomEmailLocalPart(fullName);
-                emailInput.value = `${localPart}@${targetDomain}`;
-                if (forceNewFormat) delete emailInput.dataset.manualEdit;
-            }
-        }
-
-        function updateMemberEmailDomainHint() {
-            const type = document.getElementById('member-type').value;
-            const hint = document.getElementById('member-email-hint');
-            const guestDomainContainer = document.getElementById('guest-domain-container');
-
-            if (type === 'external') {
-                if (guestDomainContainer) guestDomainContainer.classList.remove('hidden');
-                if (hint) hint.textContent = 'External client guests use selected external domain.';
-            } else {
-                if (guestDomainContainer) guestDomainContainer.classList.add('hidden');
-                if (hint) hint.textContent = `Internal staff automatically use @${companyDomain}`;
-            }
-            autoGenerateMemberEmail();
-        }
-
-        function updateMemberSliderLabels(val) {
-            const reqVal = parseInt(val, 10);
-            const optVal = 100 - reqVal;
-            const reqLabel = document.getElementById('member-req-label');
-            const optLabel = document.getElementById('member-opt-label');
-            if (reqLabel) reqLabel.textContent = `REQ: ${reqVal}%`;
-            if (optLabel) optLabel.textContent = `OPT: ${optVal}%`;
-        }
-
-        function openMemberModal(memberId = null) {
-            const modal = document.getElementById('modal-member');
-            if (!modal) return;
-
-            populateGuestDomainDropdown();
-            const emailInput = document.getElementById('member-email');
-            const slider = document.getElementById('member-req-slider');
-
-            if (memberId) {
-                const m = teamMembers.find(item => item.id === memberId);
-                if (m) {
-                    document.getElementById('modal-member-title').textContent = 'Edit Team Member / Guest';
-                    document.getElementById('member-id').value = m.id;
-                    document.getElementById('member-name').value = m.name;
-                    document.getElementById('member-type').value = m.memberType;
-                    document.getElementById('member-role').value = m.role;
-                    if (emailInput) {
-                        emailInput.value = m.email;
-                        emailInput.dataset.manualEdit = 'true';
-                    }
-                    if (slider) {
-                        slider.value = m.requiredWeight !== undefined ? m.requiredWeight : 80;
-                        updateMemberSliderLabels(slider.value);
-                    }
-                    if (m.isExternal) {
-                        const domain = m.email.split('@')[1];
-                        const select = document.getElementById('member-guest-domain');
-                        if (select && domain) select.value = domain;
-                    }
-                }
-            } else {
-                document.getElementById('modal-member-title').textContent = 'Add Team Member / Guest';
-                document.getElementById('member-id').value = '';
-                document.getElementById('member-name').value = '';
-                document.getElementById('member-type').value = 'se';
-                document.getElementById('member-role').value = 'Solutions Engineer';
-                if (slider) {
-                    slider.value = 80;
-                    updateMemberSliderLabels(80);
-                }
-                if (emailInput) {
-                    emailInput.value = '';
-                    delete emailInput.dataset.manualEdit;
-                }
-            }
-            updateMemberEmailDomainHint();
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) modal.classList.add('hidden');
-        }
-
-        function handleSaveMember(e) {
-            e.preventDefault();
-            const id = document.getElementById('member-id').value;
-            const name = document.getElementById('member-name').value;
-            const memberType = document.getElementById('member-type').value;
-            const role = document.getElementById('member-role').value;
-            let email = document.getElementById('member-email').value;
-            const requiredWeight = parseInt(document.getElementById('member-req-slider').value, 10) || 80;
-
-            const isExternal = (memberType === 'external');
-
-            if (!isExternal && !email.endsWith(`@${companyDomain}`)) {
-                const local = email.split('@')[0] || generateRandomEmailLocalPart(name);
-                email = `${local}@${companyDomain}`;
-            }
-
-            if (id) {
-                const index = teamMembers.findIndex(m => m.id === id);
-                if (index !== -1) {
-                    teamMembers[index] = { id, name, memberType, role, email, isExternal, requiredWeight };
-                }
-            } else {
-                const newId = 'mem_' + Date.now();
-                teamMembers.push({ id: newId, name, memberType, role, email, isExternal, requiredWeight });
-            }
-
-            renderPrimaryUserSelector();
-            renderTeamCheckboxes();
-            renderTeamCards();
-            closeModal('modal-member');
-            saveStateLocally();
-            showToast('Member saved successfully!');
-        }
-
-        function deleteMember(id) {
-            if (id === primaryUserId) {
-                showToast('Cannot delete the primary target user! Assign another primary target user first.');
-                return;
-            }
-            teamMembers = teamMembers.filter(m => m.id !== id);
-            renderPrimaryUserSelector();
-            renderTeamCheckboxes();
-            renderTeamCards();
-            saveStateLocally();
-            showToast('Member removed.');
-        }
-
-        function generateRandomAttendee() {
-            const firstName = mockNames[Math.floor(Math.random() * mockNames.length)];
-            const lastName = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller"][Math.floor(Math.random() * 7)];
-            const fullName = `${firstName.split(' ')[0]} ${lastName}`;
-            const randDomain = externalDomains[Math.floor(Math.random() * externalDomains.length)];
-            const localPart = generateRandomEmailLocalPart(fullName);
-            const email = `${localPart}@${randDomain}`;
-
-            const newMember = {
-                id: 'mem_' + Date.now(),
-                name: fullName,
-                role: 'Client Technical Lead',
-                memberType: 'external',
-                isExternal: true,
-                email: email,
-                requiredWeight: Math.floor(Math.random() * 41) + 50 // 50-90% Required
-            };
-
-            teamMembers.push(newMember);
-            renderTeamCheckboxes();
-            renderTeamCards();
-            saveStateLocally();
-            showToast(`Added random guest: ${fullName}`);
-        }
-
-        function renderActivityCheckboxes() {
-            const workContainer = document.getElementById('activity-checkboxes-work');
-            const personalContainer = document.getElementById('activity-checkboxes-personal');
-
-            const work = activityProfiles.filter(a => a.category === 'work');
-            const personal = activityProfiles.filter(a => a.category === 'personal');
-
-            if (workContainer) {
-                workContainer.innerHTML = work.map(act => `
-                    <label class="flex items-center gap-2 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 cursor-pointer hover:border-slate-700">
-                        <input type="checkbox" value="${act.id}" checked class="act-checkbox rounded text-sky-500 bg-slate-900 border-slate-700">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-200 block truncate">${act.name}</span>
-                                <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono font-bold">W:${act.weight || 50}</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500">${act.prefix} • ${act.isFullDay ? 'Full Day' : act.defaultMins + 'm'}</span>
-                        </div>
-                    </label>
-                `).join('');
-            }
-
-            if (personalContainer) {
-                personalContainer.innerHTML = personal.map(act => `
-                    <label class="flex items-center gap-2 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 cursor-pointer hover:border-slate-700">
-                        <input type="checkbox" value="${act.id}" class="act-checkbox rounded text-purple-500 bg-slate-900 border-slate-700">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-200 block truncate">${act.name}</span>
-                                <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono font-bold">W:${act.weight || 10}</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500">${act.prefix} • ${act.isFullDay ? 'Full Day' : act.defaultMins + 'm'}</span>
-                        </div>
-                    </label>
-                `).join('');
-            }
-        }
-
-        function renderActivityCards() {
-            const container = document.getElementById('activity-cards-container');
-            if (!container) return;
-            container.innerHTML = activityProfiles.map(a => `
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-bold text-sky-400 font-mono">${a.prefix}</span>
-                                <h3 class="text-sm font-bold text-white">${a.name}</h3>
-                            </div>
-                            <p class="text-xs text-slate-400 mt-1">Default: ${a.isFullDay || a.defaultMins >= 600 ? 'Full Day (10 hours)' : a.defaultMins + ' mins'}</p>
-                        </div>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${a.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
-                            ${a.category.toUpperCase()}
-                        </span>
-                    </div>
-
-                    <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 space-y-1.5">
-                        <div class="flex items-center justify-between text-[11px]">
-                            <span class="text-slate-400 font-medium">Random Weight Probability</span>
-                            <span id="card-weight-val-${a.id}" class="font-bold text-sky-400 font-mono">${a.weight || 50}/100</span>
-                        </div>
-                        <input type="range" min="1" max="100" value="${a.weight || 50}" 
-                            oninput="document.getElementById('card-weight-val-${a.id}').textContent = this.value + '/100'"
-                            onchange="updateActivityWeight('${a.id}', this.value)"
-                            class="w-full accent-sky-500 bg-slate-900 rounded h-1.5 border border-slate-800">
-                    </div>
-
-                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-800/80">
-                        <button onclick="deleteActivity('${a.id}')" class="text-xs text-rose-400 hover:text-rose-300">Delete</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function openActivityModal() {
-            document.getElementById('activity-id').value = '';
-            document.getElementById('activity-name').value = '';
-            document.getElementById('activity-prefix').value = '[NEW]';
-            document.getElementById('activity-duration').value = '60';
-            document.getElementById('activity-category').value = 'work';
-            document.getElementById('activity-weight').value = '50';
-            document.getElementById('activity-weight-val').textContent = '50';
-            document.getElementById('modal-activity').classList.remove('hidden');
-        }
-
-        function handleSaveActivity(e) {
-            e.preventDefault();
-            const id = 'act_' + Date.now();
-            const name = document.getElementById('activity-name').value;
-            const prefix = document.getElementById('activity-prefix').value;
-            const defaultMins = parseInt(document.getElementById('activity-duration').value, 10);
-            const category = document.getElementById('activity-category').value;
-            const weight = parseInt(document.getElementById('activity-weight').value, 10) || 50;
-            const isFullDay = (defaultMins >= 600);
-
-            activityProfiles.push({ id, name, prefix, defaultMins, category, isFullDay, weight });
-            renderActivityCards();
-            renderActivityCheckboxes();
-            closeModal('modal-activity');
-            saveStateLocally();
-            showToast('Activity profile saved!');
-        }
-
-        function deleteActivity(id) {
-            activityProfiles = activityProfiles.filter(a => a.id !== id);
-            renderActivityCards();
-            renderActivityCheckboxes();
-            saveStateLocally();
-            showToast('Activity profile removed.');
-        }
-
-        function openDomainSettingsModal() {
-            document.getElementById('company-domain-input').value = companyDomain;
-            document.getElementById('external-domains-input').value = externalDomains.join(', ');
-            document.getElementById('modal-domain').classList.remove('hidden');
-        }
-
-        function handleSaveDomainSettings(e) {
-            e.preventDefault();
-            const newCompDomain = document.getElementById('company-domain-input').value.trim().replace(/^@/, '');
-            const extInput = document.getElementById('external-domains-input').value;
-
-            if (newCompDomain) {
-                companyDomain = newCompDomain;
-                teamMembers.forEach(m => {
-                    if (!m.isExternal) {
-                        const local = m.email.split('@')[0] || generateRandomEmailLocalPart(m.name);
-                        m.email = `${local}@${companyDomain}`;
-                    }
-                });
-            }
-
-            if (extInput) {
-                externalDomains = extInput.split(',').map(d => d.trim().replace(/^@/, '')).filter(Boolean);
-            }
-
-            updateDomainUI();
-            renderPrimaryUserSelector();
-            renderTeamCheckboxes();
-            renderTeamCards();
-            closeModal('modal-domain');
-            saveStateLocally();
-            showToast('Domain settings updated!');
-        }
-
-        function addRandomClientDomain() {
-            const prefixes = ['apex', 'vanguard', 'summit', 'hyper', 'nexus', 'strata', 'synergy', 'vertex'];
-            const suffixes = ['corp.com', 'tech.io', 'systems.net', 'solutions.org', 'cloud.net', 'labs.io'];
-            const p = prefixes[Math.floor(Math.random() * prefixes.length)];
-            const s = suffixes[Math.floor(Math.random() * suffixes.length)];
-            const newDom = `${p}-${s}`;
-
-            if (!externalDomains.includes(newDom)) {
-                externalDomains.push(newDom);
-                const input = document.getElementById('external-domains-input');
-                if (input) input.value = externalDomains.join(', ');
-                showToast(`Added domain: ${newDom}`);
-            }
-        }
-
-        function updateDomainUI() {
-            const badge = document.getElementById('header-domain-badge');
-            const label = document.getElementById('roster-domain-label');
-            if (badge) badge.textContent = `@${companyDomain}`;
-            if (label) label.textContent = `@${companyDomain}`;
-        }
-
-        function setPresetRange(preset) {
-            const start = new Date();
-            let end = new Date();
-            if (preset === '2w') {
-                end.setDate(start.getDate() + 14);
-            } else if (preset === '1m') {
-                end.setMonth(start.getMonth() + 1);
-            } else if (preset === '3m') {
-                end.setMonth(start.getMonth() + 3);
-            }
-            document.getElementById('input-start-date').value = start.toISOString().split('T')[0];
-            document.getElementById('input-end-date').value = end.toISOString().split('T')[0];
-        }
-
-        function renderDurationCheckboxes() {
-            const container = document.getElementById('duration-checkboxes-container');
-            if (!container) return;
-            container.innerHTML = allowedDurations.map(dur => `
-                <label class="flex items-center gap-2 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 cursor-pointer text-xs font-medium ${selectedDurations.includes(dur) ? 'text-sky-400 border-sky-500/50' : 'text-slate-400'}">
-                    <input type="checkbox" value="${dur}" ${selectedDurations.includes(dur) ? 'checked' : ''} onchange="toggleDuration(${dur})" class="rounded text-sky-500 bg-slate-900 border-slate-700">
-                    <span>${dur} mins</span>
-                </label>
-            `).join('');
-        }
-
-        function toggleDuration(mins) {
-            if (selectedDurations.includes(mins)) {
-                selectedDurations = selectedDurations.filter(d => d !== mins);
-            } else {
-                selectedDurations.push(mins);
-            }
-            renderDurationCheckboxes();
-        }
-
-        function toggleAllActivities(select) {
-            document.querySelectorAll('.act-checkbox').forEach(cb => cb.checked = select);
-        }
-
-        function renderTeamCheckboxes() {
-            const container = document.getElementById('team-checkboxes-container');
-            if (!container) return;
-            container.innerHTML = teamMembers.map(m => `
-                <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border ${m.id === primaryUserId ? 'border-sky-500/60 bg-sky-950/20' : 'border-slate-800/80'} cursor-pointer hover:border-slate-700">
-                    <div class="flex items-center gap-2.5">
-                        <input type="checkbox" value="${m.id}" ${m.id === primaryUserId ? 'checked disabled' : 'checked'} class="mem-checkbox rounded text-emerald-500 bg-slate-900 border-slate-700">
-                        <div>
-                            <span class="text-xs font-semibold ${m.id === primaryUserId ? 'text-sky-300 font-bold' : 'text-slate-200'} block">
-                                ${m.name} ${m.id === primaryUserId ? '<span class="text-[9px] bg-sky-500/20 text-sky-400 px-1.5 py-0.2 rounded ml-1 border border-sky-500/30">PRIMARY TARGET</span>' : ''}
-                            </span>
-                            <span class="text-[10px] text-slate-400">${m.role} • ${m.email}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[9px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800" title="Required vs Optional Probability">Req:${m.requiredWeight || 80}%</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
-                            ${m.isExternal ? 'Guest' : m.memberType.toUpperCase()}
-                        </span>
-                    </div>
-                </label>
-            `).join('');
-        }
-
-        function renderTeamCards() {
-            const container = document.getElementById('team-cards-container');
-            if (!container) return;
-            container.innerHTML = teamMembers.map(m => `
-                <div class="bg-slate-900 border ${m.id === primaryUserId ? 'border-sky-500/60 bg-gradient-to-br from-slate-900 to-sky-950/30' : 'border-slate-800'} rounded-2xl p-4 flex flex-col justify-between space-y-3 relative">
-                    ${m.id === primaryUserId ? '<div class="absolute top-2 right-2 text-[9px] bg-sky-500/20 text-sky-400 font-bold px-2 py-0.5 rounded border border-sky-500/30">PRIMARY TARGET</div>' : ''}
-                    <div>
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <h3 class="text-sm font-bold text-white">${m.name}</h3>
-                                <p class="text-xs text-sky-400 font-medium">${m.role}</p>
-                                <p class="text-xs text-slate-400 mt-1">${m.email}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 space-y-1">
-                        <div class="flex items-center justify-between text-[11px]">
-                            <span class="text-slate-400">Attendance Probability</span>
-                            <span class="font-mono text-sky-400 font-bold">REQ: ${m.requiredWeight || 80}% | OPT: ${100 - (m.requiredWeight || 80)}%</span>
-                        </div>
-                        <div class="w-full bg-purple-900/40 h-1.5 rounded-full overflow-hidden flex">
-                            <div class="bg-sky-400 h-full" style="width: ${m.requiredWeight || 80}%"></div>
-                            <div class="bg-purple-400 h-full" style="width: ${100 - (m.requiredWeight || 80)}%"></div>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-                        <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
-                            ${m.isExternal ? 'EXTERNAL GUEST' : m.memberType === 'se' ? 'SOLUTIONS ENGINEER' : 'ACCOUNT EXEC'}
-                        </span>
-                        <div class="flex gap-2">
-                            <button onclick="openMemberModal('${m.id}')" class="text-xs text-sky-400 hover:text-sky-300">Edit</button>
-                            ${m.id !== primaryUserId ? `<button onclick="deleteMember('${m.id}')" class="text-xs text-rose-400 hover:text-rose-300">Delete</button>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Determine attendee Required vs Optional role based on probability
-        function evaluateAttendeeRole(member) {
-            const reqChance = member.requiredWeight !== undefined ? member.requiredWeight : 80;
-            const roll = Math.random() * 100;
-            return roll < reqChance; // true = Required, false = Optional
         }
 
         function generateBatchSchedule() {
@@ -1258,6 +1145,24 @@
             const minDailyMeetings = parseInt(document.getElementById('input-min-daily').value, 10) || 2;
             const maxDailyMeetings = parseInt(document.getElementById('input-max-daily').value, 10) || 6;
             const includeDailyLunch = document.getElementById('input-daily-lunch').checked;
+
+            const primaryAccSlider = document.getElementById('primary-user-accepted-slider');
+            if (primaryAccSlider) {
+                primaryUserAcceptedWeight = parseInt(primaryAccSlider.value, 10);
+            }
+            if (isNaN(primaryUserAcceptedWeight)) primaryUserAcceptedWeight = 80;
+
+            const primaryReqSlider = document.getElementById('primary-user-req-slider');
+            if (primaryReqSlider) {
+                primaryUserReqWeight = parseInt(primaryReqSlider.value, 10);
+            }
+            if (isNaN(primaryUserReqWeight)) primaryUserReqWeight = 80;
+
+            const primaryOrgSlider = document.getElementById('primary-user-org-slider');
+            if (primaryOrgSlider) {
+                primaryUserOrgWeight = parseInt(primaryOrgSlider.value, 10);
+            }
+            if (isNaN(primaryUserOrgWeight)) primaryUserOrgWeight = 50;
 
             const effectiveMinDaily = Math.min(minDailyMeetings, maxDailyMeetings);
             const effectiveMaxDaily = Math.max(minDailyMeetings, maxDailyMeetings);
@@ -1288,6 +1193,9 @@
             const internalOrganizers = activeMembers.filter(m => !m.isExternal);
 
             const primaryUserObj = teamMembers.find(m => m.id === primaryUserId) || internalOrganizers[0];
+            if (primaryUserObj) {
+                primaryUserObj.reqWeight = primaryUserReqWeight;
+            }
 
             if (internalOrganizers.length === 0) {
                 showToast('You must select at least one Internal SE/AE member as an organizer!');
@@ -1315,7 +1223,6 @@
             businessDays.forEach(d => {
                 const key = d.toISOString().split('T')[0];
                 daySchedules[key] = [];
-                // Assign a randomized max meetings cap for each day between Min and Max settings
                 dayCaps[key] = Math.floor(Math.random() * (effectiveMaxDaily - effectiveMinDaily + 1)) + effectiveMinDaily;
             });
 
@@ -1329,8 +1236,8 @@
                     lunchEnd.setMinutes(lunchStart.getMinutes() + 45);
 
                     const organizer = primaryUserObj;
-                    const primaryStatus = getPrimaryUserResponseStatus();
 
+                    // Organizer is ALWAYS Accepted & Required
                     newEvents.push({
                         id: 'evt_' + Math.random().toString(36).substr(2, 9),
                         title: lunchProfile.name,
@@ -1340,8 +1247,8 @@
                         end: lunchEnd,
                         durationMins: 45,
                         organizer: organizer,
-                        description: generateEventDescription(lunchProfile.prefix, lunchProfile.name, organizer, [{...organizer, responseStatus: primaryStatus, isReq: true}], 'personal'),
-                        attendees: [{ ...organizer, responseStatus: primaryStatus, isReq: true, role: 'REQ-PARTICIPANT' }]
+                        description: generateEventDescription(lunchProfile.prefix, lunchProfile.name, organizer, [{...organizer, responseStatus: 'ACCEPTED', isReq: true}], 'personal'),
+                        attendees: [{ ...organizer, responseStatus: 'ACCEPTED', isReq: true, role: 'REQ-PARTICIPANT' }]
                     });
                 });
             }
@@ -1353,15 +1260,24 @@
                 }
             });
 
-            // 2. Distribute Work Meetings (Weighted Random Probability)
+            // 2. Distribute Work Meetings
             let remainingWorkMeetings = targetTotalWork;
             let attempts = 0;
             const maxAttempts = targetTotalWork * 25;
 
+            // Compute exact targets for Primary User as Organizer vs Attendee
+            const otherInternalOrganizers = internalOrganizers.filter(m => m.id !== primaryUserId);
+            const targetOrgMeetings = (otherInternalOrganizers.length === 0) 
+                ? targetTotalWork 
+                : Math.round(targetTotalWork * (primaryUserOrgWeight / 100));
+            const targetAttMeetings = targetTotalWork - targetOrgMeetings;
+
+            let currentOrgCount = 0;
+            let currentAttCount = 0;
+
             while (remainingWorkMeetings > 0 && attempts < maxAttempts) {
                 attempts++;
 
-                // Pick eligible days that haven't reached their assigned daily cap
                 const eligibleDays = businessDays.filter(d => {
                     const key = d.toISOString().split('T')[0];
                     return daySchedules[key].length < dayCaps[key];
@@ -1369,7 +1285,6 @@
 
                 if (eligibleDays.length === 0) break;
 
-                // Prioritize days that haven't reached effectiveMinDaily yet
                 const underMinDays = eligibleDays.filter(d => {
                     const key = d.toISOString().split('T')[0];
                     return daySchedules[key].length < effectiveMinDaily;
@@ -1388,7 +1303,7 @@
                 const duration = durList[Math.floor(Math.random() * durList.length)];
 
                 const startHour = 8;
-                const endHour = 18; // 10-hour window (8:00 AM - 6:00 PM)
+                const endHour = 18;
 
                 const possibleStartHour = startHour + Math.floor(Math.random() * (endHour - startHour - Math.ceil(duration / 60)));
                 const possibleStartMin = Math.random() < 0.5 ? 0 : 30;
@@ -1408,11 +1323,29 @@
                 if (!hasOverlap) {
                     existing.push({ start: sTime, end: eTime });
 
-                    // Decide Organizer: 60% Primary user, 40% another internal organizer
-                    const usePrimaryAsOrg = Math.random() < 0.60;
+                    // Determine if Primary User is Organizer or Attendee based on Quota
+                    let usePrimaryAsOrg = false;
+                    if (otherInternalOrganizers.length === 0) {
+                        usePrimaryAsOrg = true;
+                    } else if (currentOrgCount < targetOrgMeetings && currentAttCount < targetAttMeetings) {
+                        const remOrg = targetOrgMeetings - currentOrgCount;
+                        const remAtt = targetAttMeetings - currentAttCount;
+                        usePrimaryAsOrg = Math.random() < (remOrg / (remOrg + remAtt));
+                    } else if (currentOrgCount < targetOrgMeetings) {
+                        usePrimaryAsOrg = true;
+                    } else {
+                        usePrimaryAsOrg = false;
+                    }
+
+                    if (usePrimaryAsOrg) {
+                        currentOrgCount++;
+                    } else {
+                        currentAttCount++;
+                    }
+
                     const organizer = usePrimaryAsOrg 
                         ? primaryUserObj 
-                        : internalOrganizers[Math.floor(Math.random() * internalOrganizers.length)];
+                        : otherInternalOrganizers[Math.floor(Math.random() * otherInternalOrganizers.length)];
 
                     const otherMembers = activeMembers.filter(m => m.id !== organizer.id);
                     const shuffled = [...otherMembers].sort(() => 0.5 - Math.random());
@@ -1420,26 +1353,26 @@
                     
                     let selectedAttendees = shuffled.slice(0, attendeeCount);
 
-                    // ENSURE Primary Target User is always on every meeting!
                     if (organizer.id !== primaryUserObj.id && !selectedAttendees.some(a => a.id === primaryUserObj.id)) {
                         selectedAttendees.push(primaryUserObj);
                     }
 
                     const attendees = [
+                        // Organizer is ALWAYS ACCEPTED and REQUIRED
                         { 
                             ...organizer, 
-                            responseStatus: organizer.id === primaryUserObj.id ? getPrimaryUserResponseStatus() : 'ACCEPTED',
+                            responseStatus: 'ACCEPTED',
                             isReq: true,
                             role: 'REQ-PARTICIPANT'
                         },
                         ...selectedAttendees.map(m => {
                             const isReq = evaluateAttendeeRole(m);
-                            const isPrimary = (m.id === primaryUserObj.id);
+                            const respStatus = getRandomResponseStatus(false);
                             return {
                                 ...m,
-                                responseStatus: isPrimary ? getPrimaryUserResponseStatus() : getRandomResponseStatus(false),
-                                isReq: isPrimary ? true : isReq,
-                                role: (isPrimary || isReq) ? 'REQ-PARTICIPANT' : 'OPT-PARTICIPANT'
+                                responseStatus: respStatus,
+                                isReq: isReq,
+                                role: isReq ? 'REQ-PARTICIPANT' : 'OPT-PARTICIPANT'
                             };
                         })
                     ];
@@ -1463,6 +1396,47 @@
                 }
             }
 
+            // 2.1 Post-process Primary Target User attendee ratio exact compliance across batch
+            const primaryAttendeeEvents = newEvents.filter(e => 
+                e.category === 'work' && 
+                e.organizer.id !== primaryUserId && 
+                e.attendees && e.attendees.some(a => a.id === primaryUserId)
+            );
+
+            const k = primaryAttendeeEvents.length;
+            if (k > 0) {
+                let targetTentative = Math.round(k * (100 - primaryUserAcceptedWeight) / 100);
+                if (primaryUserAcceptedWeight < 100 && targetTentative === 0 && k > 0) {
+                    targetTentative = 1;
+                }
+                if (primaryUserAcceptedWeight === 100) targetTentative = 0;
+
+                let targetOptional = Math.round(k * (100 - primaryUserReqWeight) / 100);
+                if (primaryUserReqWeight < 100 && targetOptional === 0 && k > 0) {
+                    targetOptional = 1;
+                }
+                if (primaryUserReqWeight === 100) targetOptional = 0;
+
+                const indicesForStatus = [...Array(k).keys()].sort(() => 0.5 - Math.random());
+                const indicesForRole = [...Array(k).keys()].sort(() => 0.5 - Math.random());
+
+                const tentativeSet = new Set(indicesForStatus.slice(0, targetTentative));
+                const optionalSet = new Set(indicesForRole.slice(0, targetOptional));
+
+                primaryAttendeeEvents.forEach((evt, idx) => {
+                    const primaryAtt = evt.attendees.find(a => a.id === primaryUserId);
+                    if (primaryAtt) {
+                        const isTentative = tentativeSet.has(idx);
+                        const isOptional = optionalSet.has(idx);
+
+                        primaryAtt.responseStatus = isTentative ? 'TENTATIVE' : 'ACCEPTED';
+                        primaryAtt.isReq = !isOptional;
+                        primaryAtt.role = isOptional ? 'OPT-PARTICIPANT' : 'REQ-PARTICIPANT';
+                    }
+                    evt.description = generateEventDescription(evt.prefix, evt.title, evt.organizer, evt.attendees, evt.category);
+                });
+            }
+
             // 3. Add Personal Meetings & Full-Day Events
             if (personalProfiles.length > 0) {
                 businessDays.forEach(day => {
@@ -1483,7 +1457,7 @@
                             pEnd.setHours(18, 0, 0, 0);
                             duration = 600;
 
-                            if (existing.length > 0) return; // Skip full day if work meetings present
+                            if (existing.length > 0) return;
                             existing.push({ start: pStart.getTime(), end: pEnd.getTime() });
                         } else {
                             pStart.setHours(14 + Math.floor(Math.random() * 3), Math.random() < 0.5 ? 0 : 30, 0, 0);
@@ -1494,8 +1468,7 @@
                         }
 
                         const organizer = primaryUserObj;
-                        const primaryStatus = getPrimaryUserResponseStatus();
-                        const attendees = [{ ...organizer, responseStatus: primaryStatus, isReq: true, role: 'REQ-PARTICIPANT' }];
+                        const attendees = [{ ...organizer, responseStatus: 'ACCEPTED', isReq: true, role: 'REQ-PARTICIPANT' }];
 
                         newEvents.push({
                             id: 'evt_' + Math.random().toString(36).substr(2, 9),
@@ -1537,10 +1510,15 @@
                 activeDays.add(e.start.toISOString().split('T')[0]);
             });
 
-            document.getElementById('stat-total-events').textContent = generatedEvents.length;
-            document.getElementById('stat-total-hours').textContent = `${(totalMins / 60).toFixed(1)}h`;
-            document.getElementById('stat-unique-attendees').textContent = uniqueAttendees.size;
-            document.getElementById('stat-active-days').textContent = activeDays.size;
+            const totalEvt = document.getElementById('stat-total-events');
+            const totalHours = document.getElementById('stat-total-hours');
+            const uniqueAtt = document.getElementById('stat-unique-attendees');
+            const activeDaysEl = document.getElementById('stat-active-days');
+
+            if (totalEvt) totalEvt.textContent = generatedEvents.length;
+            if (totalHours) totalHours.textContent = `${(totalMins / 60).toFixed(1)}h`;
+            if (uniqueAtt) uniqueAtt.textContent = uniqueAttendees.size;
+            if (activeDaysEl) activeDaysEl.textContent = activeDays.size;
 
             if (!tbody) return;
 
@@ -1656,7 +1634,7 @@
             let icsContent = [
                 'BEGIN:VCALENDAR',
                 'VERSION:2.0',
-                'PRODID:-//SE Calendar Studio//Batch Generator v3.2//EN',
+                'PRODID:-//SE Calendar Studio//Batch Generator v3.6//EN',
                 'CALSCALE:GREGORIAN',
                 'METHOD:PUBLISH'
             ];
@@ -1692,7 +1670,20 @@
                     });
                 }
 
-                icsContent.push('STATUS:CONFIRMED');
+                const primaryAtt = evt.attendees.find(a => a.id === primaryUserId);
+                const pStatus = primaryAtt ? primaryAtt.responseStatus : 'ACCEPTED';
+
+                if (pStatus === 'TENTATIVE') {
+                    icsContent.push('STATUS:TENTATIVE');
+                    icsContent.push('X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE');
+                } else if (pStatus === 'DECLINED') {
+                    icsContent.push('STATUS:CANCELLED');
+                    icsContent.push('X-MICROSOFT-CDO-BUSYSTATUS:FREE');
+                } else {
+                    icsContent.push('STATUS:CONFIRMED');
+                    icsContent.push('X-MICROSOFT-CDO-BUSYSTATUS:BUSY');
+                }
+
                 icsContent.push('END:VEVENT');
             });
 
@@ -1715,15 +1706,602 @@
                 const btn = document.getElementById(`tab-btn-${t}`);
 
                 if (t === tabName) {
-                    content.classList.remove('hidden');
-                    btn.classList.add('border-sky-500', 'text-sky-400');
-                    btn.classList.remove('border-transparent', 'text-slate-400');
+                    if (content) content.classList.remove('hidden');
+                    if (btn) {
+                        btn.classList.add('border-sky-500', 'text-sky-400');
+                        btn.classList.remove('border-transparent', 'text-slate-400');
+                    }
                 } else {
-                    content.classList.add('hidden');
-                    btn.classList.remove('border-sky-500', 'text-sky-400');
-                    btn.classList.add('border-transparent', 'text-slate-400');
+                    if (content) content.classList.add('hidden');
+                    if (btn) {
+                        btn.classList.remove('border-sky-500', 'text-sky-400');
+                        btn.classList.add('border-transparent', 'text-slate-400');
+                    }
                 }
             });
+        }
+
+        function renderDurationCheckboxes() {
+            const container = document.getElementById('duration-checkboxes-container');
+            if (!container) return;
+            const durations = [15, 30, 45, 60, 90, 120];
+            container.innerHTML = durations.map(d => `
+                <label class="inline-flex items-center gap-2 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 cursor-pointer text-xs font-medium text-slate-200 hover:border-slate-700 transition">
+                    <input type="checkbox" value="${d}" ${selectedDurations.includes(d) ? 'checked' : ''} onchange="toggleDuration(${d})" class="rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-0 accent-sky-500">
+                    <span>${d} mins</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleDuration(mins) {
+            if (selectedDurations.includes(mins)) {
+                if (selectedDurations.length === 1) {
+                    showToast('At least one duration option must remain selected.');
+                    renderDurationCheckboxes();
+                    return;
+                }
+                selectedDurations = selectedDurations.filter(d => d !== mins);
+            } else {
+                selectedDurations.push(mins);
+            }
+            renderDurationCheckboxes();
+        }
+
+        function renderActivityCheckboxes() {
+            const workContainer = document.getElementById('activity-checkboxes-work');
+            const personalContainer = document.getElementById('activity-checkboxes-personal');
+
+            if (workContainer) {
+                workContainer.innerHTML = activityProfiles.filter(a => a.category === 'work').map(a => `
+                    <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer text-xs hover:border-slate-700 transition">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" value="${a.id}" checked class="act-checkbox rounded border-slate-700 bg-slate-900 text-sky-500 accent-sky-500">
+                            <span class="font-medium text-slate-200">${a.name}</span>
+                        </div>
+                        <div class="flex items-center gap-2 font-mono text-[10px]">
+                            <span class="text-slate-500">${a.prefix}</span>
+                            <span class="bg-sky-500/10 text-sky-400 px-1.5 py-0.5 rounded border border-sky-500/20 font-bold">W:${a.weight}</span>
+                        </div>
+                    </label>
+                `).join('');
+            }
+
+            if (personalContainer) {
+                personalContainer.innerHTML = activityProfiles.filter(a => a.category === 'personal').map(a => `
+                    <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer text-xs hover:border-slate-700 transition">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" value="${a.id}" checked class="act-checkbox rounded border-slate-700 bg-slate-900 text-purple-500 accent-purple-500">
+                            <span class="font-medium text-slate-200">${a.name}</span>
+                        </div>
+                        <div class="flex items-center gap-2 font-mono text-[10px]">
+                            <span class="text-slate-500">${a.prefix}</span>
+                            <span class="bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/20 font-bold">W:${a.weight}</span>
+                        </div>
+                    </label>
+                `).join('');
+            }
+        }
+
+        function toggleAllActivities(checked) {
+            document.querySelectorAll('.act-checkbox').forEach(cb => cb.checked = checked);
+        }
+
+        function renderTeamCheckboxes() {
+            const container = document.getElementById('team-checkboxes-container');
+            if (!container) return;
+
+            container.innerHTML = teamMembers.map(m => {
+                const isPrimary = (m.id === primaryUserId);
+                return `
+                    <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border ${isPrimary ? 'border-sky-500/60 bg-sky-950/20' : 'border-slate-800'} text-xs">
+                        <label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
+                            <input type="checkbox" value="${m.id}" ${isPrimary ? 'checked disabled' : 'checked'} class="mem-checkbox rounded border-slate-700 bg-slate-900 text-emerald-500 accent-emerald-500">
+                            <div class="truncate">
+                                <div class="font-semibold text-slate-200 flex items-center gap-1.5">
+                                    <span class="truncate">${m.name}</span>
+                                    ${isPrimary ? '<span class="text-[9px] bg-sky-500/20 text-sky-400 px-1.5 py-0.2 rounded font-bold uppercase">Primary Target</span>' : ''}
+                                </div>
+                                <span class="text-[10px] text-slate-400 truncate block">${m.email}</span>
+                            </div>
+                        </label>
+                        <div class="text-right font-mono text-[10px] flex flex-col items-end flex-shrink-0 ml-2">
+                            <span class="text-sky-400 font-bold">REQ: ${m.reqWeight || 80}%</span>
+                            <span class="text-purple-400">OPT: ${100 - (m.reqWeight || 80)}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPrimaryUserSelect() {
+            const select = document.getElementById('primary-user-select');
+            if (!select) return;
+
+            const internalMembers = teamMembers.filter(m => !m.isExternal);
+            select.innerHTML = internalMembers.map(m => `
+                <option value="${m.id}" ${m.id === primaryUserId ? 'selected' : ''}>
+                    ${m.name} (${m.role}) - ${m.email}
+                </option>
+            `).join('');
+
+            const orgSlider = document.getElementById('primary-user-org-slider');
+            if (orgSlider) orgSlider.value = primaryUserOrgWeight;
+            updatePrimaryUserOrgSliderLabels(primaryUserOrgWeight);
+
+            const accSlider = document.getElementById('primary-user-accepted-slider');
+            if (accSlider) accSlider.value = primaryUserAcceptedWeight;
+            updatePrimaryUserSliderLabels(primaryUserAcceptedWeight);
+
+            const reqSlider = document.getElementById('primary-user-req-slider');
+            if (reqSlider) reqSlider.value = primaryUserReqWeight;
+            updatePrimaryUserReqSliderLabels(primaryUserReqWeight);
+        }
+
+        function updatePrimaryUser(userId) {
+            primaryUserId = userId;
+            const mem = teamMembers.find(m => m.id === primaryUserId);
+            if (mem && mem.reqWeight !== undefined) {
+                primaryUserReqWeight = mem.reqWeight;
+            }
+            saveStateLocally();
+            renderTeamCheckboxes();
+            renderTeamCards();
+            renderPrimaryUserSelect();
+            showToast('Updated Primary Calendar Target');
+        }
+
+        function updatePrimaryUserOrgSliderLabels(val) {
+            primaryUserOrgWeight = parseInt(val, 10);
+            if (isNaN(primaryUserOrgWeight)) primaryUserOrgWeight = 50;
+            const orgLabel = document.getElementById('primary-org-label');
+            const attLabel = document.getElementById('primary-att-label');
+            if (orgLabel) orgLabel.textContent = `ORG: ${primaryUserOrgWeight}%`;
+            if (attLabel) attLabel.textContent = `ATT: ${100 - primaryUserOrgWeight}%`;
+        }
+
+        function updatePrimaryUserSliderLabels(val) {
+            primaryUserAcceptedWeight = parseInt(val, 10) || 80;
+            const accLabel = document.getElementById('primary-accepted-label');
+            const tenLabel = document.getElementById('primary-tentative-label');
+            if (accLabel) accLabel.textContent = `ACC: ${primaryUserAcceptedWeight}%`;
+            if (tenLabel) tenLabel.textContent = `TEN: ${100 - primaryUserAcceptedWeight}%`;
+        }
+
+        function updatePrimaryUserReqSliderLabels(val) {
+            primaryUserReqWeight = parseInt(val, 10) || 80;
+            const reqLabel = document.getElementById('primary-req-label');
+            const optLabel = document.getElementById('primary-opt-label');
+            if (reqLabel) reqLabel.textContent = `REQ: ${primaryUserReqWeight}%`;
+            if (optLabel) optLabel.textContent = `OPT: ${100 - primaryUserReqWeight}%`;
+            
+            const mem = teamMembers.find(m => m.id === primaryUserId);
+            if (mem) {
+                mem.reqWeight = primaryUserReqWeight;
+            }
+        }
+
+        function renderTeamCards() {
+            const container = document.getElementById('team-cards-container');
+            const domainLabel = document.getElementById('roster-domain-label');
+            if (domainLabel) domainLabel.textContent = `@${companyDomain}`;
+            if (!container) return;
+
+            container.innerHTML = teamMembers.map(m => `
+                <div class="bg-slate-900 rounded-2xl border ${m.id === primaryUserId ? 'border-sky-500/50' : 'border-slate-800'} p-4 shadow-xl space-y-3 relative overflow-hidden">
+                    ${m.id === primaryUserId ? '<span class="absolute top-0 right-0 bg-sky-500/20 text-sky-400 text-[9px] font-bold px-2 py-0.5 rounded-bl uppercase">Primary Target</span>' : ''}
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-bold text-slate-100 text-sm">${m.name}</h3>
+                            <p class="text-xs text-sky-400 font-medium">${m.role}</p>
+                        </div>
+                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                            ${m.isExternal ? 'Guest' : 'Internal'}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-mono bg-slate-950 p-2 rounded-xl border border-slate-800/80 truncate">${m.email}</p>
+                    <div class="flex items-center justify-between text-[11px] font-mono pt-1">
+                        <span class="text-slate-400">Invite Role Ratio:</span>
+                        <div class="flex gap-2">
+                            <span class="text-sky-400 font-bold">REQ ${m.reqWeight || 80}%</span>
+                            <span class="text-purple-400 font-bold">OPT ${100 - (m.reqWeight || 80)}%</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                        <button onclick="openMemberModal('${m.id}')" class="text-xs text-sky-400 hover:underline">Edit</button>
+                        ${m.id !== primaryUserId ? `<button onclick="deleteMember('${m.id}')" class="text-xs text-rose-400 hover:underline">Delete</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderActivityCards() {
+            const container = document.getElementById('activity-cards-container');
+            if (!container) return;
+
+            container.innerHTML = activityProfiles.map(a => `
+                <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-xl space-y-3">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${a.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">${a.prefix}</span>
+                                <h3 class="font-bold text-slate-100 text-sm">${a.name}</h3>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-slate-300">
+                            ${a.isFullDay ? 'Full Day' : a.defaultMins + 'm'}
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-1.5 pt-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-400">Frequency Weight:</span>
+                            <span class="font-mono font-bold text-sky-400" id="card-act-weight-${a.id}">${a.weight}</span>
+                        </div>
+                        <input type="range" min="1" max="100" value="${a.weight}" 
+                               oninput="updateActivityWeightInline('${a.id}', this.value)"
+                               class="w-full accent-sky-500 bg-slate-950 rounded h-1.5 border border-slate-800">
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                        <button onclick="openActivityModal('${a.id}')" class="text-xs text-sky-400 hover:underline">Edit</button>
+                        <button onclick="deleteActivity('${a.id}')" class="text-xs text-rose-400 hover:underline">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateActivityWeightInline(id, val) {
+            const act = activityProfiles.find(a => a.id === id);
+            if (act) {
+                act.weight = parseInt(val, 10) || 50;
+                const label = document.getElementById(`card-act-weight-${id}`);
+                if (label) label.textContent = act.weight;
+                saveStateLocally();
+                renderActivityCheckboxes();
+            }
+        }
+
+        function rerollActivityWeights() {
+            activityProfiles.forEach(a => {
+                if (a.id === 'act_p5' || a.prefix === '[PTO]') {
+                    a.weight = Math.floor(Math.random() * 10) + 1;
+                } else if (a.category === 'personal') {
+                    a.weight = Math.floor(Math.random() * 39) + 1;
+                } else {
+                    a.weight = Math.floor(Math.random() * 61) + 40;
+                }
+            });
+            saveStateLocally();
+            renderActivityCards();
+            renderActivityCheckboxes();
+            showToast('Rerolled activity frequency weights!');
+        }
+
+        function getWeightedRandomProfile(profiles) {
+            if (!profiles || profiles.length === 0) return null;
+            const totalWeight = profiles.reduce((sum, p) => sum + (p.weight || 1), 0);
+            let randomNum = Math.random() * totalWeight;
+            for (let p of profiles) {
+                if (randomNum < (p.weight || 1)) {
+                    return p;
+                }
+                randomNum -= (p.weight || 1);
+            }
+            return profiles[0];
+        }
+
+        function evaluateAttendeeRole(member) {
+            const reqWeight = member.reqWeight !== undefined ? member.reqWeight : 80;
+            const roll = Math.random() * 100;
+            return roll < reqWeight;
+        }
+
+        function updateDomainUI() {
+            const badge = document.getElementById('header-domain-badge');
+            if (badge) badge.textContent = `@${companyDomain}`;
+            
+            teamMembers.forEach(m => {
+                if (!m.isExternal) {
+                    const parts = m.email.split('@');
+                    m.email = `${parts[0]}@${companyDomain}`;
+                }
+            });
+
+            renderTeamCards();
+            renderPrimaryUserSelect();
+        }
+
+        function openDomainSettingsModal() {
+            const domainInput = document.getElementById('company-domain-input');
+            const extInput = document.getElementById('external-domains-input');
+
+            if (domainInput) domainInput.value = companyDomain;
+            if (extInput) extInput.value = externalDomains.join(', ');
+
+            const modal = document.getElementById('modal-domain');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function handleSaveDomainSettings(e) {
+            e.preventDefault();
+            const domainInput = document.getElementById('company-domain-input').value.trim();
+            const extInput = document.getElementById('external-domains-input').value;
+
+            if (domainInput) companyDomain = domainInput;
+            if (extInput) {
+                externalDomains = extInput.split(',').map(d => d.trim().replace(/^@/, '')).filter(Boolean);
+            }
+
+            updateDomainUI();
+            saveStateLocally();
+            closeModal('modal-domain');
+            showToast('Domain settings updated!');
+        }
+
+        function addRandomClientDomain() {
+            const prefixes = ['apex', 'vanguard', 'summit', 'hyper', 'nexus', 'strata', 'pinnacle', 'quantum', 'synapse', 'velocity'];
+            const suffixes = ['tech', 'corp', 'systems', 'solutions', 'labs', 'global', 'net', 'io', 'com'];
+
+            const newDomain = `${prefixes[Math.floor(Math.random() * prefixes.length)]}-${suffixes[Math.floor(Math.random() * suffixes.length)]}.${suffixes[Math.floor(Math.random() * (suffixes.length - 2))] || 'com'}`;
+            
+            if (!externalDomains.includes(newDomain)) {
+                externalDomains.push(newDomain);
+            }
+
+            const extInput = document.getElementById('external-domains-input');
+            if (extInput) extInput.value = externalDomains.join(', ');
+
+            showToast(`Added client domain: @${newDomain}`);
+        }
+
+        function openMemberModal(memberId = null) {
+            const modal = document.getElementById('modal-member');
+            const title = document.getElementById('modal-member-title');
+            const idInput = document.getElementById('member-id');
+            const nameInput = document.getElementById('member-name');
+            const typeSelect = document.getElementById('member-type');
+            const roleInput = document.getElementById('member-role');
+            const emailInput = document.getElementById('member-email');
+            const reqSlider = document.getElementById('member-req-slider');
+            const guestDomainSelect = document.getElementById('member-guest-domain');
+
+            if (guestDomainSelect) {
+                guestDomainSelect.innerHTML = externalDomains.map(d => `<option value="${d}">@${d}</option>`).join('');
+            }
+
+            if (memberId) {
+                const member = teamMembers.find(m => m.id === memberId);
+                if (member) {
+                    title.textContent = 'Edit Team Member / Guest';
+                    idInput.value = member.id;
+                    nameInput.value = member.name;
+                    typeSelect.value = member.type || (member.isExternal ? 'external' : 'se');
+                    roleInput.value = member.role;
+                    emailInput.value = member.email;
+                    if (reqSlider) reqSlider.value = member.reqWeight || 80;
+                    if (guestDomainSelect && member.guestDomain) guestDomainSelect.value = member.guestDomain;
+                }
+            } else {
+                title.textContent = 'Add Team Member / Guest';
+                idInput.value = '';
+                nameInput.value = '';
+                typeSelect.value = 'se';
+                roleInput.value = 'Solutions Engineer';
+                emailInput.value = '';
+                if (reqSlider) reqSlider.value = 80;
+            }
+
+            updateMemberEmailDomainHint();
+            updateMemberSliderLabels(reqSlider ? reqSlider.value : 80);
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function updateMemberEmailDomainHint() {
+            const typeSelect = document.getElementById('member-type');
+            const guestContainer = document.getElementById('guest-domain-container');
+            const hint = document.getElementById('member-email-hint');
+
+            if (typeSelect && typeSelect.value === 'external') {
+                if (guestContainer) guestContainer.classList.remove('hidden');
+                if (hint) hint.textContent = 'External guests use client domain selection.';
+            } else {
+                if (guestContainer) guestContainer.classList.add('hidden');
+                if (hint) hint.textContent = `Internal members automatically enforce @${companyDomain}`;
+            }
+            autoGenerateMemberEmail();
+        }
+
+        function updateMemberSliderLabels(val) {
+            const reqVal = parseInt(val, 10) || 80;
+            const reqLabel = document.getElementById('member-req-label');
+            const optLabel = document.getElementById('member-opt-label');
+            if (reqLabel) reqLabel.textContent = `REQ: ${reqVal}%`;
+            if (optLabel) optLabel.textContent = `OPT: ${100 - reqVal}%`;
+        }
+
+        function autoGenerateMemberEmail(force = false) {
+            const nameInput = document.getElementById('member-name');
+            const emailInput = document.getElementById('member-email');
+            const typeSelect = document.getElementById('member-type');
+            const guestDomainSelect = document.getElementById('member-guest-domain');
+
+            if (!nameInput || !emailInput) return;
+            if (!force && emailInput.dataset.manualEdit === 'true') return;
+
+            const rawName = nameInput.value.trim().toLowerCase();
+            if (!rawName) return;
+
+            const parts = rawName.split(/\s+/);
+            const first = parts[0] || 'user';
+            const last = parts[parts.length - 1] || 'guest';
+            const fInitial = first.charAt(0);
+
+            const patterns = [
+                `${first}.${last}`,
+                `${fInitial}.${last}`,
+                `${first}_${last}`,
+                `${last}`,
+                `${first}`,
+                `${fInitial}${last}`
+            ];
+
+            const chosenPattern = patterns[Math.floor(Math.random() * patterns.length)];
+
+            let domain = companyDomain;
+            if (typeSelect && typeSelect.value === 'external') {
+                domain = (guestDomainSelect && guestDomainSelect.value) ? guestDomainSelect.value : externalDomains[0];
+            }
+
+            emailInput.value = `${chosenPattern}@${domain}`;
+        }
+
+        function handleSaveMember(e) {
+            e.preventDefault();
+            const id = document.getElementById('member-id').value;
+            const name = document.getElementById('member-name').value.trim();
+            const type = document.getElementById('member-type').value;
+            const role = document.getElementById('member-role').value.trim();
+            const email = document.getElementById('member-email').value.trim();
+            const reqWeight = parseInt(document.getElementById('member-req-slider').value, 10) || 80;
+            const guestDomainSelect = document.getElementById('member-guest-domain');
+
+            const isExternal = (type === 'external');
+            const guestDomain = isExternal && guestDomainSelect ? guestDomainSelect.value : null;
+
+            if (id) {
+                const index = teamMembers.findIndex(m => m.id === id);
+                if (index !== -1) {
+                    teamMembers[index] = { ...teamMembers[index], name, type, role, email, isExternal, reqWeight, guestDomain };
+                }
+            } else {
+                const newId = 'mem_' + Math.random().toString(36).substr(2, 9);
+                teamMembers.push({ id: newId, name, type, role, email, isExternal, reqWeight, guestDomain });
+            }
+
+            saveStateLocally();
+            renderTeamCards();
+            renderTeamCheckboxes();
+            renderPrimaryUserSelect();
+            closeModal('modal-member');
+            showToast('Member saved successfully.');
+        }
+
+        function deleteMember(id) {
+            if (id === primaryUserId) {
+                showToast('Cannot delete Primary Calendar Target member!');
+                return;
+            }
+            teamMembers = teamMembers.filter(m => m.id !== id);
+            saveStateLocally();
+            renderTeamCards();
+            renderTeamCheckboxes();
+            renderPrimaryUserSelect();
+            showToast('Member removed.');
+        }
+
+        function generateRandomAttendee() {
+            const firsts = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Sam', 'Casey', 'Riley', 'Avery', 'Dakota', 'Cameron'];
+            const lasts = ['Vance', 'Sterling', 'Mercer', 'Hayes', 'Chen', 'Ross', 'Fletcher', 'Novak', 'Sloan', 'Barrett'];
+            const roles = ['Sr. Solutions Architect', 'VP Infrastructure', 'IT Security Manager', 'Director of Engineering', 'Lead DevOps'];
+
+            const fname = firsts[Math.floor(Math.random() * firsts.length)];
+            const lname = lasts[Math.floor(Math.random() * lasts.length)];
+            const fullName = `${fname} ${lname}`;
+            const role = roles[Math.floor(Math.random() * roles.length)];
+            const guestDomain = externalDomains[Math.floor(Math.random() * externalDomains.length)];
+
+            const email = `${fname.toLowerCase()}.${lname.toLowerCase()}@${guestDomain}`;
+            const newId = 'mem_' + Math.random().toString(36).substr(2, 9);
+
+            teamMembers.push({
+                id: newId,
+                name: fullName,
+                type: 'external',
+                role: role,
+                email: email,
+                isExternal: true,
+                guestDomain: guestDomain,
+                reqWeight: Math.floor(Math.random() * 30) + 60
+            });
+
+            saveStateLocally();
+            renderTeamCards();
+            renderTeamCheckboxes();
+            showToast(`Added external guest: ${fullName}`);
+        }
+
+        function openActivityModal(actId = null) {
+            const modal = document.getElementById('modal-activity');
+            const idInput = document.getElementById('activity-id');
+            const nameInput = document.getElementById('activity-name');
+            const prefixInput = document.getElementById('activity-prefix');
+            const categorySelect = document.getElementById('activity-category');
+            const durationSelect = document.getElementById('activity-duration');
+            const weightInput = document.getElementById('activity-weight');
+            const weightVal = document.getElementById('activity-weight-val');
+
+            if (actId) {
+                const act = activityProfiles.find(a => a.id === actId);
+                if (act) {
+                    idInput.value = act.id;
+                    nameInput.value = act.name;
+                    prefixInput.value = act.prefix;
+                    categorySelect.value = act.category;
+                    durationSelect.value = act.defaultMins;
+                    weightInput.value = act.weight || 50;
+                    if (weightVal) weightVal.textContent = act.weight || 50;
+                }
+            } else {
+                idInput.value = '';
+                nameInput.value = '';
+                prefixInput.value = '[NEW]';
+                categorySelect.value = 'work';
+                durationSelect.value = '60';
+                weightInput.value = 50;
+                if (weightVal) weightVal.textContent = 50;
+            }
+
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function handleSaveActivity(e) {
+            e.preventDefault();
+            const id = document.getElementById('activity-id').value;
+            const name = document.getElementById('activity-name').value.trim();
+            const prefix = document.getElementById('activity-prefix').value.trim();
+            const category = document.getElementById('activity-category').value;
+            const defaultMins = parseInt(document.getElementById('activity-duration').value, 10) || 60;
+            const weight = parseInt(document.getElementById('activity-weight').value, 10) || 50;
+            const isFullDay = (defaultMins >= 600);
+
+            if (id) {
+                const idx = activityProfiles.findIndex(a => a.id === id);
+                if (idx !== -1) {
+                    activityProfiles[idx] = { ...activityProfiles[idx], name, prefix, category, defaultMins, weight, isFullDay };
+                }
+            } else {
+                const newId = 'act_' + Math.random().toString(36).substr(2, 9);
+                activityProfiles.push({ id: newId, name, prefix, category, defaultMins, weight, isFullDay });
+            }
+
+            saveStateLocally();
+            renderActivityCards();
+            renderActivityCheckboxes();
+            closeModal('modal-activity');
+            showToast('Activity profile saved.');
+        }
+
+        function deleteActivity(id) {
+            activityProfiles = activityProfiles.filter(a => a.id !== id);
+            saveStateLocally();
+            renderActivityCards();
+            renderActivityCheckboxes();
+            showToast('Activity profile removed.');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('hidden');
         }
 
         function showToast(msg) {
@@ -1739,7 +2317,25 @@
             }, 3000);
         }
 
-        window.addEventListener('DOMContentLoaded', initializeUI);
+        function initializeUI() {
+            initTheme();
+            loadSavedState();
+            setPresetRange('3m');
+            renderDurationCheckboxes();
+            renderActivityCheckboxes();
+            renderTeamCheckboxes();
+            renderPrimaryUserSelect();
+            renderTeamCards();
+            renderActivityCards();
+            updateDomainUI();
+            renderQueueTable();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeUI);
+        } else {
+            initializeUI();
+        }
     </script>
 </body>
 </html>
