@@ -73,18 +73,18 @@ PRODID:-//SE Calendar Studio//Batch Generator v3.6//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
-UID:evt_k9x2p1a8z@securwrix.com
+UID:evt_k9x2p1a8z@securitytest.example
 DTSTAMP:20260806T143000Z
 DTSTART:20260901T130000Z
 DTEND:20260901T140000Z
 SUMMARY:[DISC] Discovery Session - Elena Rostova
 DESCRIPTION:Activity Type: [DISC]\nSubject: Discovery Session - Elena Rosto
  va\n...
-ORGANIZER;CN=Alex Rivera:MAILTO:alex.rivera@securwrix.com
+ORGANIZER;CN=Alex Rivera:MAILTO:alex.rivera@securitytest.example
 ATTENDEE;CN=Alex Rivera;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=TRUE:MA
- ILTO:alex.rivera@securwrix.com
+ ILTO:alex.rivera@securitytest.example
 ATTENDEE;CN=Elena Rostova;ROLE=REQ-PARTICIPANT;PARTSTAT=TENTATIVE;RSVP=TRUE
- :MAILTO:elena.rostova@acemcorp.com
+ :MAILTO:elena.rostova@acmecorp.example
 STATUS:CONFIRMED
 X-MICROSOFT-CDO-BUSYSTATUS:BUSY
 END:VEVENT
@@ -95,7 +95,9 @@ Times are written in UTC (`Z`), converted from the browser's local time zone at 
 
 ## Responsible use
 
-- Generated attendee addresses use the domains you configure. If a domain is real, those addresses may belong to real people. Prefer domains you own or reserved test domains (`example.com`, `example.org`, `*.example`, `*.test`) when the calendar is connected to a live mail system.
+- The default company domain (`securitytest.example`), the default client guest domains, and those created by **+ Random Client Domain** all use the reserved `.example` top-level domain ([RFC 2606](https://www.rfc-editor.org/rfc/rfc2606)), so they cannot reach real inboxes.
+- Any company or guest domain you enter yourself is used as-is. If a domain is real, generated addresses may belong to real people. Prefer domains you own or reserved test domains (`example.com`, `*.example`, `*.test`) when the calendar is connected to a live mail system.
+- Settings are saved in `localStorage`, so a browser that used an earlier version keeps its previously saved domains until you change them in the domain settings.
 - Importing an `.ics` with `METHOD:PUBLISH` adds events locally and does not send invitations, but forwarding, editing, or re-sending those events from a mail client can email the listed attendees.
 - The Teams links are random strings in Teams URL format; they do not correspond to real meetings.
 - This project is not affiliated with or endorsed by Microsoft. Outlook and Microsoft Teams are trademarks of Microsoft Corporation.

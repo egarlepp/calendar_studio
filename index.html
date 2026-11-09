@@ -178,7 +178,7 @@
             
             <button onclick="openDomainSettingsModal()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition">
                 <span class="w-2 h-2 rounded-full bg-sky-400"></span>
-                <span id="header-domain-badge">@securwrix.com</span>
+                <span id="header-domain-badge">@securitytest.example</span>
                 <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -513,7 +513,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-white">Team Roster & Guest Directory</h2>
-                    <p class="text-xs text-slate-400">Internal SEs & Sales Reps enforce company domain <span id="roster-domain-label" class="text-sky-400 font-semibold">@securwrix.com</span></p>
+                    <p class="text-xs text-slate-400">Internal SEs & Sales Reps enforce company domain <span id="roster-domain-label" class="text-sky-400 font-semibold">@securitytest.example</span></p>
                 </div>
                 <div class="flex gap-2">
                     <button onclick="generateRandomAttendee()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl border border-slate-700 font-medium">+ Random Client Guest</button>
@@ -683,7 +683,7 @@
                             Randomize Format
                         </button>
                     </div>
-                    <input type="email" id="member-email" required placeholder="jordan.smith@securwrix.com" oninput="this.dataset.manualEdit='true'" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none">
+                    <input type="email" id="member-email" required placeholder="jordan.smith@securitytest.example" oninput="this.dataset.manualEdit='true'" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none">
                     <p id="member-email-hint" class="text-[10px] text-slate-500 mt-1">Internal members will automatically adapt to company domain.</p>
                 </div>
 
@@ -768,8 +768,9 @@
 
     <script>
         // Global State Variables
-        let companyDomain = 'securwrix.com';
-        let externalDomains = ['testing.com', 'acemcorp.com', 'apex-corp.com', 'vanguard-tech.io', 'summit-systems.net', 'hyper-solutions.org'];
+        let companyDomain = 'securitytest.example';
+        // Guest domains use the reserved .example TLD (RFC 2606) so generated attendees can never resolve to real inboxes.
+        let externalDomains = ['testing.example', 'acmecorp.example', 'apex-corp.example', 'vanguard-tech.example', 'summit-systems.example', 'hyper-solutions.example'];
         let primaryUserId = 'mem_1'; // Default target user forced onto all meetings
         let primaryUserAcceptedWeight = 80; // Default 80% Accepted, 20% Tentative
         let primaryUserReqWeight = 80; // Default 80% Required, 20% Optional
@@ -1098,11 +1099,11 @@
         }
 
         let teamMembers = [
-            { id: 'mem_1', name: 'Alex Rivera', role: 'Sr. Solutions Engineer', type: 'se', email: 'alex.rivera@securwrix.com', isExternal: false, reqWeight: 80 },
-            { id: 'mem_2', name: 'Jordan Smith', role: 'Solutions Engineer', type: 'se', email: 'jordan.smith@securwrix.com', isExternal: false, reqWeight: 80 },
-            { id: 'mem_3', name: 'Sarah Chen', role: 'Enterprise AE', type: 'sales', email: 'sarah.chen@securwrix.com', isExternal: false, reqWeight: 85 },
-            { id: 'mem_4', name: 'Elena Rostova', role: 'VP of Tech Ops', type: 'external', guestDomain: 'acemcorp.com', email: 'elena.rostova@acemcorp.com', isExternal: true, reqWeight: 75 },
-            { id: 'mem_5', name: 'David Miller', role: 'Director of Security', type: 'external', guestDomain: 'testing.com', email: 'david.miller@testing.com', isExternal: true, reqWeight: 70 }
+            { id: 'mem_1', name: 'Alex Rivera', role: 'Sr. Solutions Engineer', type: 'se', email: 'alex.rivera@securitytest.example', isExternal: false, reqWeight: 80 },
+            { id: 'mem_2', name: 'Jordan Smith', role: 'Solutions Engineer', type: 'se', email: 'jordan.smith@securitytest.example', isExternal: false, reqWeight: 80 },
+            { id: 'mem_3', name: 'Sarah Chen', role: 'Enterprise AE', type: 'sales', email: 'sarah.chen@securitytest.example', isExternal: false, reqWeight: 85 },
+            { id: 'mem_4', name: 'Elena Rostova', role: 'VP of Tech Ops', type: 'external', guestDomain: 'acmecorp.example', email: 'elena.rostova@acmecorp.example', isExternal: true, reqWeight: 75 },
+            { id: 'mem_5', name: 'David Miller', role: 'Director of Security', type: 'external', guestDomain: 'testing.example', email: 'david.miller@testing.example', isExternal: true, reqWeight: 70 }
         ];
 
         let activityProfiles = [
@@ -2119,9 +2120,9 @@
 
         function addRandomClientDomain() {
             const prefixes = ['apex', 'vanguard', 'summit', 'hyper', 'nexus', 'strata', 'pinnacle', 'quantum', 'synapse', 'velocity'];
-            const suffixes = ['tech', 'corp', 'systems', 'solutions', 'labs', 'global', 'net', 'io', 'com'];
+            const suffixes = ['tech', 'corp', 'systems', 'solutions', 'labs', 'global'];
 
-            const newDomain = `${prefixes[Math.floor(Math.random() * prefixes.length)]}-${suffixes[Math.floor(Math.random() * suffixes.length)]}.${suffixes[Math.floor(Math.random() * (suffixes.length - 2))] || 'com'}`;
+            const newDomain = `${prefixes[Math.floor(Math.random() * prefixes.length)]}-${suffixes[Math.floor(Math.random() * suffixes.length)]}.example`;
             
             if (!externalDomains.includes(newDomain)) {
                 externalDomains.push(newDomain);
