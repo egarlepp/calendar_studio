@@ -1,5 +1,7 @@
 # SE Calendar Studio
 
+> Built for the Greater Good.
+
 A single-file, browser-only tool that generates realistic, multi-week calendars for Solutions Engineering / Technical Sales teams and exports them as an RFC 5545 `.ics` file you can import into Outlook, Google Calendar, or Apple Calendar.
 
 Use it to populate demo tenants, seed test calendars, exercise calendar integrations, or load-test scheduling tooling with believable data, without touching anyone's real schedule.
