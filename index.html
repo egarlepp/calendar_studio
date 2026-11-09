@@ -785,6 +785,74 @@
         let calTempStartDate = null;
         let calTempEndDate = null;
 
+        // Escapes user-controlled text before it is interpolated into innerHTML or an HTML attribute.
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Returns YYYY-MM-DD in the browser's local time zone.
+        // toISOString() converts to UTC first, which shifts the date for anyone not on UTC.
+        function localDateKey(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        // Parses a YYYY-MM-DD string as local midnight. new Date('YYYY-MM-DD') parses as UTC midnight.
+        function parseLocalDate(isoStr) {
+            const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoStr || ''));
+            if (!match) return null;
+            const d = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        // RFC 5545 §3.3.11: escape backslash, semicolon, comma and newlines in TEXT values.
+        function escapeICSText(value) {
+            return String(value ?? '')
+                .replace(/\\/g, '\\\\')
+                .replace(/;/g, '\\;')
+                .replace(/,/g, '\\,')
+                .replace(/\r?\n/g, '\\n');
+        }
+
+        // RFC 5545 §3.2: parameter values containing ':', ';' or ',' must be quoted; DQUOTE is not allowed.
+        function quoteICSParam(value) {
+            const clean = String(value ?? '').replace(/"/g, "'").replace(/[\r\n]/g, ' ');
+            return /[:;,]/.test(clean) ? `"${clean}"` : clean;
+        }
+
+        // RFC 5545 §3.1: fold content lines longer than 75 octets (CRLF + single space continuation).
+        function foldICSLine(line) {
+            const encoder = new TextEncoder();
+            if (encoder.encode(line).length <= 75) return line;
+            const chunks = [];
+            let current = '';
+            let currentBytes = 0;
+            for (const ch of line) {
+                const chBytes = encoder.encode(ch).length;
+                const limit = chunks.length === 0 ? 75 : 74; // continuation lines start with a space
+                if (currentBytes + chBytes > limit) {
+                    chunks.push(current);
+                    current = '';
+                    currentBytes = 0;
+                }
+                current += ch;
+                currentBytes += chBytes;
+            }
+            chunks.push(current);
+            return chunks.join('\r\n ');
+        }
+
+        function makeId(prefix) {
+            return `${prefix}_${Math.random().toString(36).slice(2, 11)}`;
+        }
+
         function initTheme() {
             const savedTheme = localStorage.getItem('se_calendar_studio_theme') || 'dark';
             applyTheme(savedTheme);
@@ -824,8 +892,13 @@
             const startVal = document.getElementById('input-start-date').value;
             const endVal = document.getElementById('input-end-date').value;
 
-            calTempStartDate = startVal ? new Date(startVal + 'T00:00:00') : new Date();
-            calTempEndDate = endVal ? new Date(endVal + 'T00:00:00') : new Date(calTempStartDate.getTime() + 90 * 86400000);
+            const today = new Date();
+            calTempStartDate = parseLocalDate(startVal) || new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            calTempEndDate = parseLocalDate(endVal);
+            if (!calTempEndDate) {
+                calTempEndDate = new Date(calTempStartDate);
+                calTempEndDate.setDate(calTempEndDate.getDate() + 90);
+            }
 
             calCurrentYear = calTempStartDate.getFullYear();
             calCurrentMonth = calTempStartDate.getMonth();
@@ -849,7 +922,7 @@
 
         function applyCalPreset(preset) {
             const today = new Date();
-            const start = new Date(today);
+            const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             if (start.getDay() === 0) start.setDate(start.getDate() + 1);
             if (start.getDay() === 6) start.setDate(start.getDate() + 2);
 
@@ -866,8 +939,9 @@
         }
 
         function selectCalDate(dateStr) {
-            const clicked = new Date(dateStr + 'T00:00:00');
-            
+            const clicked = parseLocalDate(dateStr);
+            if (!clicked) return;
+
             if (!calTempStartDate || (calTempStartDate && calTempEndDate)) {
                 calTempStartDate = clicked;
                 calTempEndDate = null;
@@ -900,13 +974,10 @@
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(calCurrentYear, calCurrentMonth, day);
-                const yearStr = dateObj.getFullYear();
-                const monthStr = String(dateObj.getMonth() + 1).padStart(2, '0');
-                const dayStr = String(day).padStart(2, '0');
-                const isoStr = `${yearStr}-${monthStr}-${dayStr}`;
+                const isoStr = localDateKey(dateObj);
 
-                let isStart = calTempStartDate && calTempStartDate.toISOString().split('T')[0] === isoStr;
-                let isEnd = calTempEndDate && calTempEndDate.toISOString().split('T')[0] === isoStr;
+                let isStart = calTempStartDate && localDateKey(calTempStartDate) === isoStr;
+                let isEnd = calTempEndDate && localDateKey(calTempEndDate) === isoStr;
                 let inRange = calTempStartDate && calTempEndDate && dateObj > calTempStartDate && dateObj < calTempEndDate;
 
                 let isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
@@ -935,8 +1006,8 @@
             const rEnd = document.getElementById('cal-readout-end');
             const rBdays = document.getElementById('cal-readout-bdays');
 
-            if (rStart) rStart.textContent = calTempStartDate ? calTempStartDate.toISOString().split('T')[0] : '---';
-            if (rEnd) rEnd.textContent = calTempEndDate ? calTempEndDate.toISOString().split('T')[0] : 'Select End Date';
+            if (rStart) rStart.textContent = calTempStartDate ? localDateKey(calTempStartDate) : '---';
+            if (rEnd) rEnd.textContent = calTempEndDate ? localDateKey(calTempEndDate) : 'Select End Date';
 
             if (calTempStartDate && calTempEndDate) {
                 let count = 0;
@@ -957,11 +1028,12 @@
                 return;
             }
             if (!calTempEndDate) {
-                calTempEndDate = new Date(calTempStartDate.getTime() + 14 * 86400000);
+                calTempEndDate = new Date(calTempStartDate);
+                calTempEndDate.setDate(calTempEndDate.getDate() + 14);
             }
 
-            const startISO = calTempStartDate.toISOString().split('T')[0];
-            const endISO = calTempEndDate.toISOString().split('T')[0];
+            const startISO = localDateKey(calTempStartDate);
+            const endISO = localDateKey(calTempEndDate);
 
             const startInput = document.getElementById('input-start-date');
             const endInput = document.getElementById('input-end-date');
@@ -1005,7 +1077,7 @@
             const endDateInput = document.getElementById('input-end-date');
             if (!startDateInput || !endDateInput) return;
 
-            const start = new Date(today);
+            const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             if (start.getDay() === 0) start.setDate(start.getDate() + 1);
             if (start.getDay() === 6) start.setDate(start.getDate() + 2);
 
@@ -1019,8 +1091,8 @@
                 end.setMonth(start.getMonth() + 3);
             }
 
-            startDateInput.value = start.toISOString().split('T')[0];
-            endDateInput.value = end.toISOString().split('T')[0];
+            startDateInput.value = localDateKey(start);
+            endDateInput.value = localDateKey(end);
 
             updatePresetPillsUI(preset);
         }
@@ -1172,8 +1244,12 @@
                 return;
             }
 
-            const start = new Date(startDateInput);
-            const end = new Date(endDateInput);
+            const start = parseLocalDate(startDateInput);
+            const end = parseLocalDate(endDateInput);
+            if (!start || !end) {
+                showToast('Please select valid start and end dates.');
+                return;
+            }
             if (start > end) {
                 showToast('Start date must be before end date!');
                 return;
@@ -1221,7 +1297,7 @@
             const daySchedules = {};
             const dayCaps = {};
             businessDays.forEach(d => {
-                const key = d.toISOString().split('T')[0];
+                const key = localDateKey(d);
                 daySchedules[key] = [];
                 dayCaps[key] = Math.floor(Math.random() * (effectiveMaxDaily - effectiveMinDaily + 1)) + effectiveMinDaily;
             });
@@ -1239,7 +1315,7 @@
 
                     // Organizer is ALWAYS Accepted & Required
                     newEvents.push({
-                        id: 'evt_' + Math.random().toString(36).substr(2, 9),
+                        id: makeId('evt'),
                         title: lunchProfile.name,
                         prefix: lunchProfile.prefix,
                         category: 'personal',
@@ -1254,7 +1330,7 @@
             }
 
             newEvents.forEach(evt => {
-                const key = evt.start.toISOString().split('T')[0];
+                const key = localDateKey(evt.start);
                 if (daySchedules[key]) {
                     daySchedules[key].push({ start: evt.start.getTime(), end: evt.end.getTime() });
                 }
@@ -1279,20 +1355,20 @@
                 attempts++;
 
                 const eligibleDays = businessDays.filter(d => {
-                    const key = d.toISOString().split('T')[0];
+                    const key = localDateKey(d);
                     return daySchedules[key].length < dayCaps[key];
                 });
 
                 if (eligibleDays.length === 0) break;
 
                 const underMinDays = eligibleDays.filter(d => {
-                    const key = d.toISOString().split('T')[0];
+                    const key = localDateKey(d);
                     return daySchedules[key].length < effectiveMinDaily;
                 });
 
                 const candidateDays = underMinDays.length > 0 ? underMinDays : eligibleDays;
                 const randomDay = candidateDays[Math.floor(Math.random() * candidateDays.length)];
-                const dayKey = randomDay.toISOString().split('T')[0];
+                const dayKey = localDateKey(randomDay);
                 const existing = daySchedules[dayKey];
 
                 const profile = workProfiles.length > 0 
@@ -1380,7 +1456,7 @@
                     const title = `${profile.name} - ${attendees[1]?.name || 'Client Sync'}`;
 
                     newEvents.push({
-                        id: 'evt_' + Math.random().toString(36).substr(2, 9),
+                        id: makeId('evt'),
                         title: title,
                         prefix: profile.prefix,
                         category: 'work',
@@ -1440,7 +1516,7 @@
             // 3. Add Personal Meetings & Full-Day Events
             if (personalProfiles.length > 0) {
                 businessDays.forEach(day => {
-                    const dayKey = day.toISOString().split('T')[0];
+                    const dayKey = localDateKey(day);
                     const existing = daySchedules[dayKey] || [];
 
                     if (Math.random() > 0.65) {
@@ -1461,7 +1537,8 @@
                             existing.push({ start: pStart.getTime(), end: pEnd.getTime() });
                         } else {
                             pStart.setHours(14 + Math.floor(Math.random() * 3), Math.random() < 0.5 ? 0 : 30, 0, 0);
-                            pEnd.setMinutes(pStart.getMinutes() + prof.defaultMins);
+                            pEnd = new Date(pStart.getTime() + prof.defaultMins * 60000);
+                            if (pEnd.getHours() > 18 || (pEnd.getHours() === 18 && pEnd.getMinutes() > 0)) return;
 
                             if (existing.some(slot => (pStart.getTime() < slot.end && pEnd.getTime() > slot.start))) return;
                             existing.push({ start: pStart.getTime(), end: pEnd.getTime() });
@@ -1471,7 +1548,7 @@
                         const attendees = [{ ...organizer, responseStatus: 'ACCEPTED', isReq: true, role: 'REQ-PARTICIPANT' }];
 
                         newEvents.push({
-                            id: 'evt_' + Math.random().toString(36).substr(2, 9),
+                            id: makeId('evt'),
                             title: prof.name,
                             prefix: prof.prefix,
                             category: 'personal',
@@ -1507,7 +1584,7 @@
                 totalMins += e.durationMins || 0;
                 if (e.organizer) uniqueAttendees.add(e.organizer.email);
                 (e.attendees || []).forEach(a => uniqueAttendees.add(a.email));
-                activeDays.add(e.start.toISOString().split('T')[0]);
+                activeDays.add(localDateKey(e.start));
             });
 
             const totalEvt = document.getElementById('stat-total-events');
@@ -1574,7 +1651,7 @@
                 const attendeesPills = e.attendees.map(a => `
                     <div class="inline-flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800 text-[11px] my-0.5">
                         ${getRoleBadge(a.isReq)}
-                        <span class="text-slate-200 font-medium ${a.id === primaryUserId ? 'text-sky-300 font-bold' : ''}">${a.name}</span>
+                        <span class="text-slate-200 font-medium ${a.id === primaryUserId ? 'text-sky-300 font-bold' : ''}">${escapeHtml(a.name)}</span>
                         ${getStatusBadge(a.responseStatus)}
                     </div>
                 `).join(' ');
@@ -1592,17 +1669,17 @@
                         </td>
                         <td class="p-3.5 max-w-xs">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${e.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">${e.prefix}</span>
-                                <span class="font-semibold text-slate-100 truncate" title="${e.title}">${e.title}</span>
+                                <span class="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${e.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">${escapeHtml(e.prefix)}</span>
+                                <span class="font-semibold text-slate-100 truncate" title="${escapeHtml(e.title)}">${escapeHtml(e.title)}</span>
                             </div>
-                            <p class="text-[10px] text-slate-400 line-clamp-1 italic font-mono" title="${e.description}">${e.description.replace(/\n/g, ' • ')}</p>
+                            <p class="text-[10px] text-slate-400 line-clamp-1 italic font-mono" title="${escapeHtml(e.description)}">${escapeHtml(e.description.replace(/\n/g, ' • '))}</p>
                         </td>
-                        <td class="p-3.5 text-slate-300 font-medium">${e.organizer?.name || 'N/A'}</td>
+                        <td class="p-3.5 text-slate-300 font-medium">${escapeHtml(e.organizer?.name || 'N/A')}</td>
                         <td class="p-3.5 max-w-sm">
                             <div class="flex flex-wrap gap-1">${attendeesPills}</div>
                         </td>
                         <td class="p-3.5 text-right">
-                            <button onclick="deleteEvent('${e.id}')" class="text-rose-400 hover:text-rose-300 text-xs">Remove</button>
+                            <button onclick="deleteEvent(${escapeHtml(JSON.stringify(e.id))})" class="text-rose-400 hover:text-rose-300 text-xs">Remove</button>
                         </td>
                     </tr>
                 `;
@@ -1653,24 +1730,23 @@
                 icsContent.push(`DTSTAMP:${dtStamp}`);
                 icsContent.push(`DTSTART:${dtStart}`);
                 icsContent.push(`DTEND:${dtEnd}`);
-                icsContent.push(`SUMMARY:${evt.prefix} ${evt.title}`);
+                icsContent.push(`SUMMARY:${escapeICSText(`${evt.prefix} ${evt.title}`)}`);
 
                 if (evt.description) {
-                    const escapedDesc = evt.description.replace(/\n/g, '\\n').replace(/,/g, '\\,');
-                    icsContent.push(`DESCRIPTION:${escapedDesc}`);
+                    icsContent.push(`DESCRIPTION:${escapeICSText(evt.description)}`);
                 }
 
-                icsContent.push(`ORGANIZER;CN=${evt.organizer?.name || 'SE Operations'}:MAILTO:${evt.organizer?.email || ('se-ops@' + companyDomain)}`);
+                icsContent.push(`ORGANIZER;CN=${quoteICSParam(evt.organizer?.name || 'SE Operations')}:MAILTO:${evt.organizer?.email || ('se-ops@' + companyDomain)}`);
 
                 if (evt.attendees && evt.attendees.length > 0) {
                     evt.attendees.forEach(a => {
                         const status = a.responseStatus || (a.email === evt.organizer?.email ? 'ACCEPTED' : 'NEEDS-ACTION');
                         const role = a.role || (a.isReq ? 'REQ-PARTICIPANT' : 'OPT-PARTICIPANT');
-                        icsContent.push(`ATTENDEE;CN=${a.name};ROLE=${role};PARTSTAT=${status};RSVP=TRUE:MAILTO:${a.email}`);
+                        icsContent.push(`ATTENDEE;CN=${quoteICSParam(a.name)};ROLE=${role};PARTSTAT=${status};RSVP=TRUE:MAILTO:${a.email}`);
                     });
                 }
 
-                const primaryAtt = evt.attendees.find(a => a.id === primaryUserId);
+                const primaryAtt = (evt.attendees || []).find(a => a.id === primaryUserId);
                 const pStatus = primaryAtt ? primaryAtt.responseStatus : 'ACCEPTED';
 
                 if (pStatus === 'TENTATIVE') {
@@ -1689,13 +1765,16 @@
 
             icsContent.push('END:VCALENDAR');
 
-            const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+            const icsBody = icsContent.map(foldICSLine).join('\r\n') + '\r\n';
+            const blob = new Blob([icsBody], { type: 'text/calendar;charset=utf-8' });
+            const objectUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', `SE_Schedule_Batch_${new Date().toISOString().split('T')[0]}.ics`);
+            link.href = objectUrl;
+            link.setAttribute('download', `SE_Schedule_Batch_${localDateKey(new Date())}.ics`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            setTimeout(() => window.URL.revokeObjectURL(objectUrl), 0);
 
             showToast(`Exported ${generatedEvents.length} events to .ICS!`);
         }
@@ -1755,11 +1834,11 @@
                 workContainer.innerHTML = activityProfiles.filter(a => a.category === 'work').map(a => `
                     <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer text-xs hover:border-slate-700 transition">
                         <div class="flex items-center gap-2">
-                            <input type="checkbox" value="${a.id}" checked class="act-checkbox rounded border-slate-700 bg-slate-900 text-sky-500 accent-sky-500">
-                            <span class="font-medium text-slate-200">${a.name}</span>
+                            <input type="checkbox" value="${escapeHtml(a.id)}" checked class="act-checkbox rounded border-slate-700 bg-slate-900 text-sky-500 accent-sky-500">
+                            <span class="font-medium text-slate-200">${escapeHtml(a.name)}</span>
                         </div>
                         <div class="flex items-center gap-2 font-mono text-[10px]">
-                            <span class="text-slate-500">${a.prefix}</span>
+                            <span class="text-slate-500">${escapeHtml(a.prefix)}</span>
                             <span class="bg-sky-500/10 text-sky-400 px-1.5 py-0.5 rounded border border-sky-500/20 font-bold">W:${a.weight}</span>
                         </div>
                     </label>
@@ -1770,11 +1849,11 @@
                 personalContainer.innerHTML = activityProfiles.filter(a => a.category === 'personal').map(a => `
                     <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer text-xs hover:border-slate-700 transition">
                         <div class="flex items-center gap-2">
-                            <input type="checkbox" value="${a.id}" checked class="act-checkbox rounded border-slate-700 bg-slate-900 text-purple-500 accent-purple-500">
-                            <span class="font-medium text-slate-200">${a.name}</span>
+                            <input type="checkbox" value="${escapeHtml(a.id)}" checked class="act-checkbox rounded border-slate-700 bg-slate-900 text-purple-500 accent-purple-500">
+                            <span class="font-medium text-slate-200">${escapeHtml(a.name)}</span>
                         </div>
                         <div class="flex items-center gap-2 font-mono text-[10px]">
-                            <span class="text-slate-500">${a.prefix}</span>
+                            <span class="text-slate-500">${escapeHtml(a.prefix)}</span>
                             <span class="bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/20 font-bold">W:${a.weight}</span>
                         </div>
                     </label>
@@ -1795,13 +1874,13 @@
                 return `
                     <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border ${isPrimary ? 'border-sky-500/60 bg-sky-950/20' : 'border-slate-800'} text-xs">
                         <label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
-                            <input type="checkbox" value="${m.id}" ${isPrimary ? 'checked disabled' : 'checked'} class="mem-checkbox rounded border-slate-700 bg-slate-900 text-emerald-500 accent-emerald-500">
+                            <input type="checkbox" value="${escapeHtml(m.id)}" ${isPrimary ? 'checked disabled' : 'checked'} class="mem-checkbox rounded border-slate-700 bg-slate-900 text-emerald-500 accent-emerald-500">
                             <div class="truncate">
                                 <div class="font-semibold text-slate-200 flex items-center gap-1.5">
-                                    <span class="truncate">${m.name}</span>
+                                    <span class="truncate">${escapeHtml(m.name)}</span>
                                     ${isPrimary ? '<span class="text-[9px] bg-sky-500/20 text-sky-400 px-1.5 py-0.2 rounded font-bold uppercase">Primary Target</span>' : ''}
                                 </div>
-                                <span class="text-[10px] text-slate-400 truncate block">${m.email}</span>
+                                <span class="text-[10px] text-slate-400 truncate block">${escapeHtml(m.email)}</span>
                             </div>
                         </label>
                         <div class="text-right font-mono text-[10px] flex flex-col items-end flex-shrink-0 ml-2">
@@ -1819,8 +1898,8 @@
 
             const internalMembers = teamMembers.filter(m => !m.isExternal);
             select.innerHTML = internalMembers.map(m => `
-                <option value="${m.id}" ${m.id === primaryUserId ? 'selected' : ''}>
-                    ${m.name} (${m.role}) - ${m.email}
+                <option value="${escapeHtml(m.id)}" ${m.id === primaryUserId ? 'selected' : ''}>
+                    ${escapeHtml(m.name)} (${escapeHtml(m.role)}) - ${escapeHtml(m.email)}
                 </option>
             `).join('');
 
@@ -1891,14 +1970,14 @@
                     ${m.id === primaryUserId ? '<span class="absolute top-0 right-0 bg-sky-500/20 text-sky-400 text-[9px] font-bold px-2 py-0.5 rounded-bl uppercase">Primary Target</span>' : ''}
                     <div class="flex items-start justify-between">
                         <div>
-                            <h3 class="font-bold text-slate-100 text-sm">${m.name}</h3>
-                            <p class="text-xs text-sky-400 font-medium">${m.role}</p>
+                            <h3 class="font-bold text-slate-100 text-sm">${escapeHtml(m.name)}</h3>
+                            <p class="text-xs text-sky-400 font-medium">${escapeHtml(m.role)}</p>
                         </div>
                         <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded ${m.isExternal ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
                             ${m.isExternal ? 'Guest' : 'Internal'}
                         </span>
                     </div>
-                    <p class="text-xs text-slate-400 font-mono bg-slate-950 p-2 rounded-xl border border-slate-800/80 truncate">${m.email}</p>
+                    <p class="text-xs text-slate-400 font-mono bg-slate-950 p-2 rounded-xl border border-slate-800/80 truncate">${escapeHtml(m.email)}</p>
                     <div class="flex items-center justify-between text-[11px] font-mono pt-1">
                         <span class="text-slate-400">Invite Role Ratio:</span>
                         <div class="flex gap-2">
@@ -1907,8 +1986,8 @@
                         </div>
                     </div>
                     <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                        <button onclick="openMemberModal('${m.id}')" class="text-xs text-sky-400 hover:underline">Edit</button>
-                        ${m.id !== primaryUserId ? `<button onclick="deleteMember('${m.id}')" class="text-xs text-rose-400 hover:underline">Delete</button>` : ''}
+                        <button onclick="openMemberModal(${escapeHtml(JSON.stringify(m.id))})" class="text-xs text-sky-400 hover:underline">Edit</button>
+                        ${m.id !== primaryUserId ? `<button onclick="deleteMember(${escapeHtml(JSON.stringify(m.id))})" class="text-xs text-rose-400 hover:underline">Delete</button>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -1923,8 +2002,8 @@
                     <div class="flex items-start justify-between">
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${a.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">${a.prefix}</span>
-                                <h3 class="font-bold text-slate-100 text-sm">${a.name}</h3>
+                                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${a.category === 'personal' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">${escapeHtml(a.prefix)}</span>
+                                <h3 class="font-bold text-slate-100 text-sm">${escapeHtml(a.name)}</h3>
                             </div>
                         </div>
                         <span class="text-[10px] font-mono font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-slate-300">
@@ -1935,16 +2014,16 @@
                     <div class="space-y-1.5 pt-1">
                         <div class="flex justify-between items-center text-xs">
                             <span class="text-slate-400">Frequency Weight:</span>
-                            <span class="font-mono font-bold text-sky-400" id="card-act-weight-${a.id}">${a.weight}</span>
+                            <span class="font-mono font-bold text-sky-400" id="card-act-weight-${escapeHtml(a.id)}">${escapeHtml(a.weight)}</span>
                         </div>
                         <input type="range" min="1" max="100" value="${a.weight}" 
-                               oninput="updateActivityWeightInline('${a.id}', this.value)"
+                               oninput="updateActivityWeightInline(${escapeHtml(JSON.stringify(a.id))}, this.value)"
                                class="w-full accent-sky-500 bg-slate-950 rounded h-1.5 border border-slate-800">
                     </div>
 
                     <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                        <button onclick="openActivityModal('${a.id}')" class="text-xs text-sky-400 hover:underline">Edit</button>
-                        <button onclick="deleteActivity('${a.id}')" class="text-xs text-rose-400 hover:underline">Delete</button>
+                        <button onclick="openActivityModal(${escapeHtml(JSON.stringify(a.id))})" class="text-xs text-sky-400 hover:underline">Edit</button>
+                        <button onclick="deleteActivity(${escapeHtml(JSON.stringify(a.id))})" class="text-xs text-rose-400 hover:underline">Delete</button>
                     </div>
                 </div>
             `).join('');
@@ -2066,7 +2145,7 @@
             const guestDomainSelect = document.getElementById('member-guest-domain');
 
             if (guestDomainSelect) {
-                guestDomainSelect.innerHTML = externalDomains.map(d => `<option value="${d}">@${d}</option>`).join('');
+                guestDomainSelect.innerHTML = externalDomains.map(d => `<option value="${escapeHtml(d)}">@${escapeHtml(d)}</option>`).join('');
             }
 
             if (memberId) {
@@ -2174,7 +2253,7 @@
                     teamMembers[index] = { ...teamMembers[index], name, type, role, email, isExternal, reqWeight, guestDomain };
                 }
             } else {
-                const newId = 'mem_' + Math.random().toString(36).substr(2, 9);
+                const newId = makeId('mem');
                 teamMembers.push({ id: newId, name, type, role, email, isExternal, reqWeight, guestDomain });
             }
 
@@ -2211,7 +2290,7 @@
             const guestDomain = externalDomains[Math.floor(Math.random() * externalDomains.length)];
 
             const email = `${fname.toLowerCase()}.${lname.toLowerCase()}@${guestDomain}`;
-            const newId = 'mem_' + Math.random().toString(36).substr(2, 9);
+            const newId = makeId('mem');
 
             teamMembers.push({
                 id: newId,
@@ -2280,7 +2359,7 @@
                     activityProfiles[idx] = { ...activityProfiles[idx], name, prefix, category, defaultMins, weight, isFullDay };
                 }
             } else {
-                const newId = 'act_' + Math.random().toString(36).substr(2, 9);
+                const newId = makeId('act');
                 activityProfiles.push({ id: newId, name, prefix, category, defaultMins, weight, isFullDay });
             }
 
@@ -2309,7 +2388,11 @@
             if (!container) return;
             const toast = document.createElement('div');
             toast.className = 'bg-slate-900 border border-sky-500/40 text-slate-100 text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl transition transform duration-300 pointer-events-auto flex items-center gap-2';
-            toast.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-400"></span><span>${msg}</span>`;
+            const dot = document.createElement('span');
+            dot.className = 'w-2 h-2 rounded-full bg-sky-400';
+            const text = document.createElement('span');
+            text.textContent = String(msg);
+            toast.append(dot, text);
             container.appendChild(toast);
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
