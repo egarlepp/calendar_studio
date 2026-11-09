@@ -69,7 +69,7 @@ An internet connection is required on first load: Tailwind CSS and the Inter fon
 ```text
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//SE Calendar Studio//Batch Generator v3.6//EN
+PRODID:-//SE Calendar Studio//Batch Generator v3.7//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
